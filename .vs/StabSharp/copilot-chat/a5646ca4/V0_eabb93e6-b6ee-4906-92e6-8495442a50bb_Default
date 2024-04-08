@@ -1,0 +1,351 @@
+Ö®DateTime◊ˇæ	 e¸&˛™ThreadName¿∞CopilotSessionIdÇ§GuidŸ$eabb93e6-b6ee-4906-92e6-8495442a50bb®ClientIdÅ¢IdŸ4Microsoft.VisualStudio.Conversations.Chat.HelpWindowßRequestÅßRequestïŸ$953924b0-daa7-4556-9cad-a2a5e6f4105eŸ$fc895b69-b613-42e6-9d11-1ff0add1625aëÜØProviderMonikerÇ§NameŸ6Microsoft.VisualStudio.Copilot.DocumentContextProviderßVersion£0.1¶Member§file©CanReduce√©RequestIdŸ$953924b0-daa7-4556-9cad-a2a5e6f4105e©Reference¿•Value»1MdŸëMicrosoft.VisualStudio.Copilot.DocumentContext, Microsoft.VisualStudio.Copilot, Version=0.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3aÖßContent⁄0Dusing System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
+namespace StabSharp
+{
+    public partial class InputForm : Form
+    {
+
+        private MainForm mainForm;
+        
+        private ObservableCollection<PromptPart> promptParts = new ObservableCollection<PromptPart>();
+        private ObservableCollection<PromptPartCategory> promptPartCategories = new ObservableCollection<PromptPartCategory>();
+        
+        private string[] yaks = { "Yakuza", "Manyak", "Yak of all trades", "Yak Nicholson", "Yak Costau", "Yak Black" };
+
+
+        public InputForm(MainForm mainform)
+        {
+            InitializeComponent();
+            this.mainForm = mainform;
+            promptPartCategories = SaveSystem.LoadCategoriesFromJson();
+            refreshCategoriesListbox();
+            noScrollListBoxPromptParts.MouseWheel += MouseWheelOnPromptParts;
+            listBoxPromptPartsCategory.MouseWheel += MouseWheelOnPromptPartsCategory;
+            noScrollListBoxPromptParts.DataSource = promptParts;
+            textBoxPrompt.AcceptsReturn = false;
+
+            this.AcceptButton = buttonGenerate;
+        }
+
+        private void MouseWheelOnPromptPartsCategory(object sender, MouseEventArgs e)
+        {
+            if (listBoxPromptPartsCategory.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            float delta = e.Delta;
+            if (Math.Abs(delta) <= 100)
+            {
+                return;
+            }
+            if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+            {
+                //Move Selected index 
+                if (delta < 0)
+                {
+                    if (listBoxPromptPartsCategory.SelectedIndex == promptPartCategories.Count - 1)
+                    {
+                        return;
+                    }
+                    promptPartCategories.Move(listBoxPromptPartsCategory.SelectedIndex, listBoxPromptPartsCategory.SelectedIndex + 1);
+                    listBoxPromptPartsCategory.SelectedIndex++;
+
+                }
+                else
+                {
+                    if (listBoxPromptPartsCategory.SelectedIndex == 0)
+                    {
+                        return;
+                    }
+                    promptPartCategories.Move(listBoxPromptPartsCategory.SelectedIndex, listBoxPromptPartsCategory.SelectedIndex - 1);
+                    listBoxPromptPartsCategory.SelectedIndex--;
+                }
+            }
+            refreshCategoriesListbox();
+        }
+
+        private void buttonGenerate_Click(object sender, EventArgs e)
+        {
+            SaveSystem.SafeSaveCategoriesToJson(promptPartCategories);
+            if(!checkBoxIgnorrePromptParts.Checked)
+            {
+                if (promptParts.Count == 0)
+                {
+
+                    return;
+                }
+                StringBuilder sb = new StringBuilder();
+                foreach (PromptPart part in promptParts)
+                {
+                    sb.Append(part.ToString());
+                    sb.Append(",");
+                }
+                sb.Remove(sb.Length - 1, 1);
+                textBoxPrompt.Text = sb.ToString();
+                checkBoxIgnorrePromptParts.Checked = false;
+            }
+
+            mainForm.AddRequestToQueue(textBoxPrompt.Text,textBoxNegativePrompt.Text);
+        }
+        private void buttonNewCategory_Click(object sender, EventArgs e)
+        {
+            promptPartCategories.Add(new PromptPartCategory("New Category"));
+            refreshCategoriesListbox();
+            listBoxPromptPartsCategory.SelectedIndex = listBoxPromptPartsCategory.Items.Count - 1;
+            textBoxPromptPartCategoryName.Select();
+        }
+        private void buttonNewPromptPartForCategory_Click(object sender, EventArgs e)
+        {
+            if (listBoxPromptPartsCategory.SelectedIndex == -1)
+            {
+                return;
+            }
+            promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].PromptParts.Add(new PromptPart("New Prompt Part"));
+            refreshPromptsFromCategoryListbox(false);
+            listBoxPromptsFromCatergory.SelectedIndex = listBoxPromptsFromCatergory.Items.Count - 1;
+            tabControl1.SelectTab(1);
+
+
+        }
+        private void buttonSave_Click(object sender, EventArgs e)
+        {
+            SaveSystem.SaveCategoriesToJson(promptPartCategories);
+        }
+
+        private void refreshListBoxPromptParts(bool keepSelectedIndex)
+        {
+            int selectedIndex = noScrollListBoxPromptParts.SelectedIndex;
+            noScrollListBoxPromptParts.DataSource = null;
+            noScrollListBoxPromptParts.DataSource = promptParts;
+            if (keepSelectedIndex)
+            {
+                noScrollListBoxPromptParts.SelectedIndex = selectedIndex;
+            }
+
+        }
+        private void refreshCategoriesListbox()
+        {
+            listBoxPromptPartsCategory.DataSource = null;
+            listBoxPromptPartsCategory.DataSource = promptPartCategories;
+        }
+        private void refreshTextBoxPromptPartWeight()
+        {
+            if (listBoxPromptsFromCatergory.SelectedIndex == -1)
+            {
+                return;
+            }
+            textBoxPromptPartWeight.Text = promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].PromptParts[listBoxPromptsFromCatergory.SelectedIndex].Weight.ToString();
+        }
+        private void refreshTabPromptPart()
+        {
+            if (listBoxPromptsFromCatergory.SelectedIndex == -1)
+            {
+                return;
+            }
+            textBoxPromptPartName.Text = promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].PromptParts[listBoxPromptsFromCatergory.SelectedIndex].Text;
+            trackBarPromptPartWeight.Value = (int)(promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].PromptParts[listBoxPromptsFromCatergory.SelectedIndex].Weight * 100);
+            refreshTextBoxPromptPartWeight();
+        }
+        private void refreshTabCategory()
+        {
+            if (listBoxPromptPartsCategory.SelectedIndex == -1)
+            {
+                return;
+            }
+            string isnow = textBoxPromptPartCategoryName.Text;
+            string shouldbe = promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].ToString();
+
+            if (textBoxPromptPartCategoryName.Text != promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].ToString())
+            {
+                textBoxPromptPartCategoryName.Text = promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].ToString();
+            }
+
+
+        }
+        private void refreshPromptsFromCategoryListbox(bool keepSelectedIndex)
+        {
+            int selectedIndex = listBoxPromptsFromCatergory.SelectedIndex;
+            listBoxPromptsFromCatergory.DataSource = null;
+            if (listBoxPromptPartsCategory.SelectedIndex != -1)
+            {
+                listBoxPromptsFromCatergory.DataSource = promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].PromptParts;
+            }
+            if (keepSelectedIndex)
+            {
+                listBoxPromptsFromCatergory.SelectedIndex = selectedIndex;
+            }
+        }
+
+        private void MouseWheelOnPromptParts(object sender, MouseEventArgs e)
+        {
+            float delta = e.Delta;
+            if (Math.Abs(delta) <= 100)
+            {
+                return;
+            }
+            if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+            {
+                //Move Selected index 
+                if (delta < 0)
+                {
+                    if (noScrollListBoxPromptParts.SelectedIndex == promptParts.Count - 1)
+                    {
+                        return;
+                    }
+                    promptParts.Move(noScrollListBoxPromptParts.SelectedIndex, noScrollListBoxPromptParts.SelectedIndex + 1);
+                    noScrollListBoxPromptParts.SelectedIndex++;
+
+                }
+                else
+                {
+                    if (noScrollListBoxPromptParts.SelectedIndex == 0)
+                    {
+                        return;
+                    }
+                    promptParts.Move(noScrollListBoxPromptParts.SelectedIndex, noScrollListBoxPromptParts.SelectedIndex - 1);
+                    noScrollListBoxPromptParts.SelectedIndex--;
+                }
+            }
+            else
+            {
+                delta = Math.Min(0.05f, delta);
+                delta = Math.Max(-0.05f, delta);
+                promptParts[noScrollListBoxPromptParts.SelectedIndex].Weight += delta;
+            }
+
+            refreshListBoxPromptParts(true);
+
+        }
+        private void trackBarPromptPartWeight_Scroll(object sender, EventArgs e)
+        {
+            //round to nearest 5
+            trackBarPromptPartWeight.Value = (int)(Math.Round(trackBarPromptPartWeight.Value / 5.0) * 5);
+            if (listBoxPromptsFromCatergory.SelectedIndex == -1)
+            {
+                return;
+            }
+            promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].PromptParts[listBoxPromptsFromCatergory.SelectedIndex].Weight = trackBarPromptPartWeight.Value / 100f;
+            refreshTextBoxPromptPartWeight();
+            refreshPromptsFromCategoryListbox(true);
+        }
+
+        private void textBoxPrompt_TextChanged(object sender, EventArgs e)
+        {
+            checkBoxIgnorrePromptParts.Checked = true;
+        }
+        private void listBoxPromptsFromCatergory_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            refreshTabPromptPart();
+            tabControl1.SelectTab(1);
+        }
+        private void listBoxPromptPartsCategory_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            refreshPromptsFromCategoryListbox(false);
+            refreshTabCategory();
+        }
+
+        private void textBoxPromptPartName_TextChanged(object sender, EventArgs e)
+        {
+            //Change the name of the prompt part
+            if (listBoxPromptsFromCatergory.SelectedIndex == -1)
+            {
+                return;
+            }
+            promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].PromptParts[listBoxPromptsFromCatergory.SelectedIndex].Text = textBoxPromptPartName.Text;
+            refreshPromptsFromCategoryListbox(true);
+        }
+        private void textBoxPromptPartCategoryName_TextChanged(object sender, EventArgs e)
+        {
+            if (listBoxPromptPartsCategory.SelectedIndex == -1)
+            {
+                return;
+            }
+            promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].Name = textBoxPromptPartCategoryName.Text;
+            refreshCategoriesListbox();
+        }
+        private void listBoxPromptsFromCatergory_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+
+            if (listBoxPromptsFromCatergory.SelectedIndex == -1)
+            {
+                return;
+            }
+            //Add a copy of the selected prompt part to the prompt parts list
+            promptParts.Add((PromptPart)promptPartCategories[listBoxPromptPartsCategory.SelectedIndex].PromptParts[listBoxPromptsFromCatergory.SelectedIndex].Clone());
+
+            refreshListBoxPromptParts(false);
+        }
+
+        private void buttonDeleteCategory_Click(object sender, EventArgs e)
+        {
+            //Delete the selected category
+            if (listBoxPromptPartsCategory.SelectedIndex == -1)
+            {
+                return;
+            }
+            promptPartCategories.RemoveAt(listBoxPromptPartsCategory.SelectedIndex);
+            refreshCategoriesListbox();
+        }
+
+        private void noScrollListBoxPromptParts_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+
+        }
+    }
+
+
+}
+ØOriginalContent¿™SelectionsëÉ•Caret¿•StartÕ/ª£EndÕ0®FilePathøC:\Files\StabSharp\InputForm.cs®Language¢C#ëíìÅ•Value ŸdnoScrollListBoxPromptParts_MouseDoubleClick
+
+Should remove tehe selected prompt part from the list¿®ResponseÖßContent⁄ˇYou can achieve this by checking if an item is selected in the `noScrollListBoxPromptParts` ListBox, and if so, remove it from the `promptParts` ObservableCollection. Here's how you can modify the `noScrollListBoxPromptParts_MouseDoubleClick` method:
+
+```C#
+private void noScrollListBoxPromptParts_MouseDoubleClick(object sender, MouseEventArgs e)
+{
+    if (noScrollListBoxPromptParts.SelectedIndex != -1)
+    {
+        promptParts.RemoveAt(noScrollListBoxPromptParts.SelectedIndex);
+        refreshListBoxPromptParts(false);
+    }
+}
+```
+
+This code checks if an item is selected in the ListBox (the SelectedIndex is not -1). If an item is selected, it removes the item from the `promptParts` ObservableCollection at the selected index, and then refreshes the ListBox.§Type ¶StatusØFollowUpPromptsíŸ;How can I prevent the removal of the last item in the list?ŸFCan I add a confirmation dialog before removing an item from the list?≥CodeVulnerabilitiesêÖ®DateTime◊ˇâúq@e˝≥u™ThreadName¿∞CopilotSessionIdÇ§GuidŸ$eabb93e6-b6ee-4906-92e6-8495442a50bb®ClientIdÅ¢IdŸ4Microsoft.VisualStudio.Conversations.Chat.HelpWindowßRequestÅßRequestïŸ$19a6d06d-e1b3-4a10-acc5-c5f1db841375Ÿ$2a47c5ea-a03a-4edb-883d-0fbd7ab4d764êëíìÅ•Value Ÿ*Add another slider for the prompt part tab¿®ResponseÖßContent⁄To add another slider to the prompt part tab, you would need to modify the `MainForm` class, which is not provided in the file context. However, I can show you a general way to add a slider (also known as a `TrackBar` in WinForms) to a form in C#. 
+
+Here's an example of how you might do it:
+
+```csharp
+using System.Windows.Forms;
+
+public partial class MainForm : Form
+{
+    private TrackBar slider;
+
+    public MainForm()
+    {
+        InitializeComponent();
+
+        slider = new TrackBar();
+        slider.Location = new System.Drawing.Point(20, 20); // Set the location
+        slider.Width = 200; // Set the width
+        slider.Minimum = 0; // Set the minimum value
+        slider.Maximum = 100; // Set the maximum value
+
+        this.Controls.Add(slider); // Add the slider to the form
+    }
+}
+```
+
+This code creates a new `TrackBar` (slider), sets its location and size, sets the minimum and maximum values, and then adds it to the form. You would need to adjust the location, size, and range to fit your specific needs.§Type ¶StatusØFollowUpPromptsíŸ.How can I set the initial value of the slider?ŸLCan I add an event handler to the slider to respond to changes in its value?≥CodeVulnerabilitiesê
