@@ -35,7 +35,7 @@
             this.linkLabelLoras = new System.Windows.Forms.LinkLabel();
             this.linkLabelDownloads = new System.Windows.Forms.LinkLabel();
             this.linkLabelModels = new System.Windows.Forms.LinkLabel();
-            this.listBoxTasks = new System.Windows.Forms.ListBox();
+            this.listboxRequests = new System.Windows.Forms.ListBox();
             this.buttonMoveToSave = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -114,14 +114,14 @@
             this.linkLabelModels.Text = "Folder: Models";
             this.linkLabelModels.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelModels_LinkClicked);
             // 
-            // listBoxTasks
+            // listboxRequests
             // 
-            this.listBoxTasks.FormattingEnabled = true;
-            this.listBoxTasks.ItemHeight = 20;
-            this.listBoxTasks.Location = new System.Drawing.Point(1480, 233);
-            this.listBoxTasks.Name = "listBoxTasks";
-            this.listBoxTasks.Size = new System.Drawing.Size(246, 124);
-            this.listBoxTasks.TabIndex = 8;
+            this.listboxRequests.FormattingEnabled = true;
+            this.listboxRequests.ItemHeight = 20;
+            this.listboxRequests.Location = new System.Drawing.Point(1480, 233);
+            this.listboxRequests.Name = "listboxRequests";
+            this.listboxRequests.Size = new System.Drawing.Size(246, 124);
+            this.listboxRequests.TabIndex = 8;
             // 
             // buttonMoveToSave
             // 
@@ -139,7 +139,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1738, 1164);
             this.Controls.Add(this.buttonMoveToSave);
-            this.Controls.Add(this.listBoxTasks);
+            this.Controls.Add(this.listboxRequests);
             this.Controls.Add(this.linkLabelModels);
             this.Controls.Add(this.linkLabelDownloads);
             this.Controls.Add(this.linkLabelLoras);
@@ -163,7 +163,7 @@
         private System.Windows.Forms.LinkLabel linkLabelLoras;
         private System.Windows.Forms.LinkLabel linkLabelDownloads;
         private System.Windows.Forms.LinkLabel linkLabelModels;
-        private System.Windows.Forms.ListBox listBoxTasks;
+        private System.Windows.Forms.ListBox listboxRequests;
         private System.Windows.Forms.Button buttonMoveToSave;
     }
 }

@@ -75,6 +75,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="PromptPart.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Request.cs" />
     <Compile Include="SaveSystem.cs" />
     <Compile Include="SDImageBase.cs" />
     <Compile Include="StableDiffusionAPI.cs" />

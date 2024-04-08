@@ -65,6 +65,7 @@
             this.buttonNewLora = new System.Windows.Forms.Button();
             this.buttonNewLoraPart = new System.Windows.Forms.Button();
             this.noScrollListBoxPromptParts = new StabSharp.NoScrollListBox();
+            this.buttonDeleteLoraPart = new System.Windows.Forms.Button();
             this.tabControlDetails.SuspendLayout();
             this.tabPageCategory.SuspendLayout();
             this.tabPagePromptPart.SuspendLayout();
@@ -280,6 +281,7 @@
             this.buttonDeleteLora.TabIndex = 5;
             this.buttonDeleteLora.Text = "Delete";
             this.buttonDeleteLora.UseVisualStyleBackColor = true;
+            this.buttonDeleteLora.Click += new System.EventHandler(this.buttonDeleteLora_Click);
             // 
             // labelLoraName
             // 
@@ -300,6 +302,7 @@
             // 
             // tabPageLoraParts
             // 
+            this.tabPageLoraParts.Controls.Add(this.buttonDeleteLoraPart);
             this.tabPageLoraParts.Controls.Add(this.checkBoxIsLora);
             this.tabPageLoraParts.Controls.Add(this.trackBarLoraPartNumberOfParantheses);
             this.tabPageLoraParts.Controls.Add(this.textBoxLoraPartWeight);
@@ -445,6 +448,16 @@
             this.noScrollListBoxPromptParts.TabIndex = 9;
             this.noScrollListBoxPromptParts.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.noScrollListBoxPromptParts_MouseDoubleClick);
             // 
+            // buttonDeleteLoraPart
+            // 
+            this.buttonDeleteLoraPart.Location = new System.Drawing.Point(439, 34);
+            this.buttonDeleteLoraPart.Name = "buttonDeleteLoraPart";
+            this.buttonDeleteLoraPart.Size = new System.Drawing.Size(75, 28);
+            this.buttonDeleteLoraPart.TabIndex = 10;
+            this.buttonDeleteLoraPart.Text = "Delete";
+            this.buttonDeleteLoraPart.UseVisualStyleBackColor = true;
+            this.buttonDeleteLoraPart.Click += new System.EventHandler(this.buttonDeleteLoraPart_Click);
+            // 
             // InputForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -524,5 +537,6 @@
         private System.Windows.Forms.TextBox textBoxLoraPartText;
         private System.Windows.Forms.CheckBox checkBoxIsLora;
         private System.Windows.Forms.TrackBar trackBarLoraPartNumberOfParantheses;
+        private System.Windows.Forms.Button buttonDeleteLoraPart;
     }
 }

@@ -101,7 +101,7 @@ namespace StabSharp
                 checkBoxIgnorrePromptParts.Checked = false;
             }
 
-            mainForm.AddRequestToQueue(textBoxPrompt.Text, textBoxNegativePrompt.Text);
+            mainForm.AddTextToImageRequestToQueue(textBoxPrompt.Text, textBoxNegativePrompt.Text);
         }
         private void buttonNewCategory_Click(object sender, EventArgs e)
         {
@@ -504,7 +504,25 @@ namespace StabSharp
             refreshListBoxPromptsFromLora(true);
         }
 
+        private void buttonDeleteLora_Click(object sender, EventArgs e)
+        {
+            if (listBoxLoras.SelectedIndex == -1)
+            {
+                return;
+            }
+            loras.RemoveAt(listBoxLoras.SelectedIndex);
+            refreshListBoxLoras(false);
+        }
 
+        private void buttonDeleteLoraPart_Click(object sender, EventArgs e)
+        {
+            if (listBoxLoras.SelectedIndex == -1 || listBoxLoraParts.SelectedIndex == -1)
+            {
+                return;
+            }
+            loras[listBoxLoras.SelectedIndex].Parts.RemoveAt(listBoxLoraParts.SelectedIndex);
+            refreshListBoxPromptsFromLora(false);
+        }
     }
 
 

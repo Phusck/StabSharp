@@ -12,16 +12,15 @@ namespace StabSharp
 {
     internal class StableDiffusionAPI
     {
-        string myPersistentDataPath = "C:/TempTemp";
+        const string myPersistentDataPath = "C:/TempTemp";
 
-
-        public async Task<SDImage> RequestTxtToImg(string prompt, string negativePrompt, bool doHires, int seed)
+        public string RequestTxtToImg(string prompt, string negativePrompt, bool doHires, int seed)
         {
-            return await MakeRequest(prompt, negativePrompt, doHires, seed);
+            return MakeRequest(prompt, negativePrompt, doHires, seed);
         }
 
 
-        private async Task<SDImage> MakeRequest(string prompt, string negativePrompt, bool doHires, int seed)
+        private string MakeRequest(string prompt, string negativePrompt, bool doHires, int seed)
         {
 
             Random random = new Random();
@@ -46,11 +45,17 @@ namespace StabSharp
                 requestData.Add("hr_upscaler", "Latent");
             }
 
-            string json = OleJsonTool(requestData);
+            return DictionaryToJson(requestData);    
+        }
+
+        public async Task<SDImage> ImageRequest(string jsonReqeustString)
+        {
+
+
 
             using (var client = new HttpClient())
             {
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var content = new StringContent(jsonReqeustString, Encoding.UTF8, "application/json");
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("text/plain"));
 
@@ -133,7 +138,7 @@ namespace StabSharp
             return strMaxImageNumber;
         }
 
-        private string OleJsonTool(Dictionary<string, string> dict)
+        private string DictionaryToJson(Dictionary<string, string> dict)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("{");
