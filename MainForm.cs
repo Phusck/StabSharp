@@ -18,9 +18,10 @@ namespace StabSharp
         List<SDImage> generatedImages = new List<SDImage>();
         List<Request> requestQueue = new List<Request>();
 
-
         //TODO: Move this to StableDiffusionAPI
         private bool stableDiffusionAPIReady = true;
+        private bool needRefresh = true;
+
 
         public MainForm()
         {
@@ -33,25 +34,46 @@ namespace StabSharp
 
         private void populateListView()
         {
-            int listIndex = listView1.SelectedIndices.Count > 0 ? listView1.SelectedIndices[0] : -1;
-            ImageList imgs = new ImageList();
-            imgs.ImageSize = new Size(100,100);
-            foreach (SDImage image in generatedImages)
+            // Only create a new ImageList if it is null or needs to be refreshed completely
+            if (listView1.SmallImageList == null || needRefresh)
             {
-                imgs.Images.Add(Image.FromFile(image.ImagePath));
+                ImageList imgs = new ImageList();
+                imgs.ImageSize = new Size(100, 100);
+
+                foreach (SDImage image in generatedImages)
+                {
+                    try
+                    {
+                        Image img = Image.FromFile(image.ImagePath); // Load the image
+                        imgs.Images.Add(img); // Add the image to the ImageList
+                                              // Do not dispose here as the ImageList needs to use the image
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle exceptions (e.g., log them)
+                        Console.WriteLine("Error loading image: " + ex.Message);
+                    }
+                }
+
+                listView1.SmallImageList = imgs; // Assign the newly created ImageList to the ListView
             }
-            listView1.SmallImageList = imgs;
+
+            // Update the ListView items
             listView1.Items.Clear();
             for (int i = generatedImages.Count - 1; i > -1; i--)
             {
                 listView1.Items.Add(generatedImages[i].Parameters.Seed.ToString(), i);
             }
-            if (listIndex != -1)
+
+            // Restore selection if applicable
+            int listIndex = listView1.SelectedIndices.Count > 0 ? listView1.SelectedIndices[0] : -1;
+            if (listIndex != -1 && listIndex < listView1.Items.Count)
             {
                 listView1.Items[listIndex].Selected = true;
+                listView1.EnsureVisible(listIndex);
             }
-
         }
+
         private void populateReqestQueue()
         {
             listboxRequests.DataSource = null;
@@ -77,13 +99,13 @@ namespace StabSharp
 
         private async void popFromQueue()
         {
-            if(!stableDiffusionAPIReady)
+            if (!stableDiffusionAPIReady)
             {
-                MessageBox.Show("Tryed to pop from Queue when not ready, this should not happen");
+                MessageBox.Show("Tried to pop from Queue when not ready, this should not happen");
                 return;
             }
 
-            if(requestQueue.Count == 0)
+            if (requestQueue.Count == 0)
             {
                 return;
             }
@@ -97,22 +119,24 @@ namespace StabSharp
                 if (!string.IsNullOrEmpty(generatedImage.ImagePath))
                 {
                     generatedImages.Add(generatedImage);
-                    var newImage = Image.FromFile(generatedImage.ImagePath);
 
+                    // Update the existing PictureBox with the new image.
+                    this.Invoke(new Action(() => {
+                        using (Image newImage = Image.FromFile(generatedImage.ImagePath))
+                        {
+                            if (pictureBox1.Image != null)
+                            {
+                                var oldImage = pictureBox1.Image;
+                                pictureBox1.Image = new Bitmap(newImage);
+                                oldImage.Dispose(); // Dispose the old image to free memory
+                            }
+                            else
+                            {
+                                pictureBox1.Image = new Bitmap(newImage);
+                            }
+                        }
+                    }));
 
-                    PictureBox newPictureBox = new PictureBox
-                    {
-                        Image = newImage,
-                        SizeMode = PictureBoxSizeMode.AutoSize,
-                        Visible = true,
-                        BorderStyle = BorderStyle.Fixed3D // Optional, adds a border around the PictureBox.
-                    };
-
-                    // Set the location of the new PictureBox. This is an example; you'll need to customize it.
-                    // For instance, you might want to arrange multiple PictureBoxes in rows/columns.
-                    newPictureBox.Location = new Point(10, 10); // You might want to dynamically calculate this.
-
-                    // Add the new PictureBox to the form.
                     populateListView();
                     stableDiffusionAPIReady = true;
                 }
@@ -126,11 +150,13 @@ namespace StabSharp
                 MessageBox.Show("Unknown request type");
             }
             populateReqestQueue();
-            popFromQueue();
-
+            if (requestQueue.Count != 0)
+            {
+                popFromQueue();
+            }
         }
 
-    private void button2_Click(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)
         {
             //Create a new InputForm
             InputForm inputForm = new InputForm(this);

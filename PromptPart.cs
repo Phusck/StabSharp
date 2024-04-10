@@ -57,7 +57,7 @@ namespace StabSharp
                 sb.Append(Text);
                 if (hasWeight)
                 {
-                    sb.Append($": {Weight.ToString("0.00", CultureInfo.InvariantCulture)}");
+                    sb.Append($": {Weight.ToString("0.00", CultureInfo.InvariantCulture)})");
                 }
                 for (int i = 0; i < QuantityOfParantheses; i++)
                 {

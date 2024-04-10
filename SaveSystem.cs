@@ -167,7 +167,7 @@ namespace StabSharp
             //Find next available name
             int i = 1;
             string iString = i.ToString("D3");
-            while (File.Exists(SAVEDIMAGESFOLDER + i + ".png"))
+            while (File.Exists(SAVEDIMAGESFOLDER + iString + ".png"))
             {
                 i++;
                 iString = i.ToString("D3");
