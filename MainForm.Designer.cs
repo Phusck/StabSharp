@@ -37,6 +37,12 @@
             this.linkLabelModels = new System.Windows.Forms.LinkLabel();
             this.listboxRequests = new System.Windows.Forms.ListBox();
             this.buttonMoveToSave = new System.Windows.Forms.Button();
+            this.buttonNewPonyInputform = new System.Windows.Forms.Button();
+            this.textBoxCurrentRequest = new System.Windows.Forms.TextBox();
+            this.labelCurrentTask = new System.Windows.Forms.Label();
+            this.labelTaskQueue = new System.Windows.Forms.Label();
+            this.progressBarCurrentRequest = new System.Windows.Forms.ProgressBar();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -118,14 +124,14 @@
             // 
             this.listboxRequests.FormattingEnabled = true;
             this.listboxRequests.ItemHeight = 20;
-            this.listboxRequests.Location = new System.Drawing.Point(1480, 233);
+            this.listboxRequests.Location = new System.Drawing.Point(1480, 367);
             this.listboxRequests.Name = "listboxRequests";
             this.listboxRequests.Size = new System.Drawing.Size(246, 124);
             this.listboxRequests.TabIndex = 8;
             // 
             // buttonMoveToSave
             // 
-            this.buttonMoveToSave.Location = new System.Drawing.Point(1502, 398);
+            this.buttonMoveToSave.Location = new System.Drawing.Point(1502, 497);
             this.buttonMoveToSave.Name = "buttonMoveToSave";
             this.buttonMoveToSave.Size = new System.Drawing.Size(153, 69);
             this.buttonMoveToSave.TabIndex = 9;
@@ -133,11 +139,68 @@
             this.buttonMoveToSave.UseVisualStyleBackColor = true;
             this.buttonMoveToSave.Click += new System.EventHandler(this.buttonMoveToSave_Click);
             // 
+            // buttonNewPonyInputform
+            // 
+            this.buttonNewPonyInputform.Location = new System.Drawing.Point(565, 12);
+            this.buttonNewPonyInputform.Name = "buttonNewPonyInputform";
+            this.buttonNewPonyInputform.Size = new System.Drawing.Size(153, 69);
+            this.buttonNewPonyInputform.TabIndex = 10;
+            this.buttonNewPonyInputform.Text = "New Pony Input form";
+            this.buttonNewPonyInputform.UseVisualStyleBackColor = true;
+            this.buttonNewPonyInputform.Click += new System.EventHandler(this.buttonNewPonyInputform_Click);
+            // 
+            // textBoxCurrentRequest
+            // 
+            this.textBoxCurrentRequest.Location = new System.Drawing.Point(1480, 286);
+            this.textBoxCurrentRequest.Name = "textBoxCurrentRequest";
+            this.textBoxCurrentRequest.Size = new System.Drawing.Size(246, 26);
+            this.textBoxCurrentRequest.TabIndex = 11;
+            // 
+            // labelCurrentTask
+            // 
+            this.labelCurrentTask.AutoSize = true;
+            this.labelCurrentTask.Location = new System.Drawing.Point(1476, 263);
+            this.labelCurrentTask.Name = "labelCurrentTask";
+            this.labelCurrentTask.Size = new System.Drawing.Size(127, 20);
+            this.labelCurrentTask.TabIndex = 12;
+            this.labelCurrentTask.Text = "Current Request";
+            // 
+            // labelTaskQueue
+            // 
+            this.labelTaskQueue.AutoSize = true;
+            this.labelTaskQueue.Location = new System.Drawing.Point(1476, 344);
+            this.labelTaskQueue.Name = "labelTaskQueue";
+            this.labelTaskQueue.Size = new System.Drawing.Size(108, 20);
+            this.labelTaskQueue.TabIndex = 13;
+            this.labelTaskQueue.Text = "Task Request";
+            // 
+            // progressBarCurrentRequest
+            // 
+            this.progressBarCurrentRequest.Location = new System.Drawing.Point(1480, 318);
+            this.progressBarCurrentRequest.Name = "progressBarCurrentRequest";
+            this.progressBarCurrentRequest.Size = new System.Drawing.Size(246, 23);
+            this.progressBarCurrentRequest.TabIndex = 14;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(1590, 606);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(153, 69);
+            this.button1.TabIndex = 15;
+            this.button1.Text = "Save";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1738, 1164);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.progressBarCurrentRequest);
+            this.Controls.Add(this.labelTaskQueue);
+            this.Controls.Add(this.labelCurrentTask);
+            this.Controls.Add(this.textBoxCurrentRequest);
+            this.Controls.Add(this.buttonNewPonyInputform);
             this.Controls.Add(this.buttonMoveToSave);
             this.Controls.Add(this.listboxRequests);
             this.Controls.Add(this.linkLabelModels);
@@ -165,6 +228,12 @@
         private System.Windows.Forms.LinkLabel linkLabelModels;
         private System.Windows.Forms.ListBox listboxRequests;
         private System.Windows.Forms.Button buttonMoveToSave;
+        private System.Windows.Forms.Button buttonNewPonyInputform;
+        private System.Windows.Forms.TextBox textBoxCurrentRequest;
+        private System.Windows.Forms.Label labelCurrentTask;
+        private System.Windows.Forms.Label labelTaskQueue;
+        private System.Windows.Forms.ProgressBar progressBarCurrentRequest;
+        private System.Windows.Forms.Button button1;
     }
 }
 

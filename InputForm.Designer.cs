@@ -52,6 +52,7 @@
             this.labelLoraName = new System.Windows.Forms.Label();
             this.textBoxLoraName = new System.Windows.Forms.TextBox();
             this.tabPageLoraParts = new System.Windows.Forms.TabPage();
+            this.buttonDeleteLoraPart = new System.Windows.Forms.Button();
             this.checkBoxIsLora = new System.Windows.Forms.CheckBox();
             this.trackBarLoraPartNumberOfParantheses = new System.Windows.Forms.TrackBar();
             this.textBoxLoraPartWeight = new System.Windows.Forms.TextBox();
@@ -64,8 +65,10 @@
             this.listBoxLoraParts = new System.Windows.Forms.ListBox();
             this.buttonNewLora = new System.Windows.Forms.Button();
             this.buttonNewLoraPart = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.trackBarSteps = new System.Windows.Forms.TrackBar();
+            this.textBoxSteps = new System.Windows.Forms.TextBox();
             this.noScrollListBoxPromptParts = new StabSharp.NoScrollListBox();
-            this.buttonDeleteLoraPart = new System.Windows.Forms.Button();
             this.tabControlDetails.SuspendLayout();
             this.tabPageCategory.SuspendLayout();
             this.tabPagePromptPart.SuspendLayout();
@@ -75,6 +78,7 @@
             this.tabPageLoraParts.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarLoraPartNumberOfParantheses)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarLoraPartWeight)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarSteps)).BeginInit();
             this.SuspendLayout();
             // 
             // textBoxPrompt
@@ -98,7 +102,7 @@
             // 
             // buttonGenerate
             // 
-            this.buttonGenerate.Location = new System.Drawing.Point(337, 99);
+            this.buttonGenerate.Location = new System.Drawing.Point(337, 12);
             this.buttonGenerate.Name = "buttonGenerate";
             this.buttonGenerate.Size = new System.Drawing.Size(116, 57);
             this.buttonGenerate.TabIndex = 4;
@@ -316,6 +320,16 @@
             this.tabPageLoraParts.Text = "Lora Parts";
             this.tabPageLoraParts.UseVisualStyleBackColor = true;
             // 
+            // buttonDeleteLoraPart
+            // 
+            this.buttonDeleteLoraPart.Location = new System.Drawing.Point(439, 34);
+            this.buttonDeleteLoraPart.Name = "buttonDeleteLoraPart";
+            this.buttonDeleteLoraPart.Size = new System.Drawing.Size(75, 28);
+            this.buttonDeleteLoraPart.TabIndex = 10;
+            this.buttonDeleteLoraPart.Text = "Delete";
+            this.buttonDeleteLoraPart.UseVisualStyleBackColor = true;
+            this.buttonDeleteLoraPart.Click += new System.EventHandler(this.buttonDeleteLoraPart_Click);
+            // 
             // checkBoxIsLora
             // 
             this.checkBoxIsLora.AutoSize = true;
@@ -438,6 +452,39 @@
             this.buttonNewLoraPart.UseVisualStyleBackColor = true;
             this.buttonNewLoraPart.Click += new System.EventHandler(this.buttonNewLoraPart_Click);
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(457, 696);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(408, 100);
+            this.textBox1.TabIndex = 22;
+            this.textBox1.Text = "score_6, score_5, score_4, pony, black and white, muscular, censored, furry, 3d,s" +
+    "imple background";
+            // 
+            // trackBarSteps
+            // 
+            this.trackBarSteps.LargeChange = 20;
+            this.trackBarSteps.Location = new System.Drawing.Point(352, 98);
+            this.trackBarSteps.Maximum = 200;
+            this.trackBarSteps.Name = "trackBarSteps";
+            this.trackBarSteps.Size = new System.Drawing.Size(263, 69);
+            this.trackBarSteps.SmallChange = 5;
+            this.trackBarSteps.TabIndex = 23;
+            this.trackBarSteps.TabStop = false;
+            this.trackBarSteps.TickFrequency = 5;
+            this.trackBarSteps.Value = 25;
+            this.trackBarSteps.Scroll += new System.EventHandler(this.trackBarSteps_Scroll);
+            // 
+            // textBoxSteps
+            // 
+            this.textBoxSteps.Location = new System.Drawing.Point(621, 109);
+            this.textBoxSteps.Name = "textBoxSteps";
+            this.textBoxSteps.ReadOnly = true;
+            this.textBoxSteps.Size = new System.Drawing.Size(70, 26);
+            this.textBoxSteps.TabIndex = 5;
+            this.textBoxSteps.Text = "25";
+            // 
             // noScrollListBoxPromptParts
             // 
             this.noScrollListBoxPromptParts.FormattingEnabled = true;
@@ -448,21 +495,14 @@
             this.noScrollListBoxPromptParts.TabIndex = 9;
             this.noScrollListBoxPromptParts.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.noScrollListBoxPromptParts_MouseDoubleClick);
             // 
-            // buttonDeleteLoraPart
-            // 
-            this.buttonDeleteLoraPart.Location = new System.Drawing.Point(439, 34);
-            this.buttonDeleteLoraPart.Name = "buttonDeleteLoraPart";
-            this.buttonDeleteLoraPart.Size = new System.Drawing.Size(75, 28);
-            this.buttonDeleteLoraPart.TabIndex = 10;
-            this.buttonDeleteLoraPart.Text = "Delete";
-            this.buttonDeleteLoraPart.UseVisualStyleBackColor = true;
-            this.buttonDeleteLoraPart.Click += new System.EventHandler(this.buttonDeleteLoraPart_Click);
-            // 
             // InputForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(2695, 819);
+            this.Controls.Add(this.textBoxSteps);
+            this.Controls.Add(this.trackBarSteps);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.buttonNewLoraPart);
             this.Controls.Add(this.buttonNewLora);
             this.Controls.Add(this.listBoxLoraParts);
@@ -495,6 +535,7 @@
             this.tabPageLoraParts.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarLoraPartNumberOfParantheses)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarLoraPartWeight)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarSteps)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -538,5 +579,8 @@
         private System.Windows.Forms.CheckBox checkBoxIsLora;
         private System.Windows.Forms.TrackBar trackBarLoraPartNumberOfParantheses;
         private System.Windows.Forms.Button buttonDeleteLoraPart;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TrackBar trackBarSteps;
+        private System.Windows.Forms.TextBox textBoxSteps;
     }
 }

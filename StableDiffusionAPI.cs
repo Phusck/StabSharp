@@ -6,6 +6,8 @@ using System.Text;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Net.Sockets;
+using System.Windows.Forms;
 
 
 namespace StabSharp
@@ -14,22 +16,23 @@ namespace StabSharp
     {
         const string myPersistentDataPath = "C:/TempTemp";
 
-        public string RequestTxtToImg(string prompt, string negativePrompt, bool doHires, int seed)
+        public string RequestTxtToImg(string prompt, string negativePrompt, bool doHires, int seed, int steps)
         {
-            return MakeRequest(prompt, negativePrompt, doHires, seed);
+            return MakeRequest(prompt, negativePrompt, doHires, seed,steps);
         }
 
 
-        private string MakeRequest(string prompt, string negativePrompt, bool doHires, int seed)
+        private string MakeRequest(string prompt, string negativePrompt, bool doHires, int seed, int steps)
         {
 
             Random random = new Random();
 
 
-            Dictionary<string,string> requestData = new Dictionary<string,string>();
+            Dictionary<string, string> requestData = new Dictionary<string, string>();
             requestData.Add("prompt", prompt);
+            requestData.Add("steps", steps.ToString());
             requestData.Add("negative_prompt", negativePrompt);
-            if(seed == -1)
+            if (seed == -1)
             {
                 requestData.Add("seed", random.Next().ToString());
             }
@@ -45,13 +48,17 @@ namespace StabSharp
                 requestData.Add("hr_upscaler", "Latent");
             }
 
-            return DictionaryToJson(requestData);    
+            return DictionaryToJson(requestData);
         }
 
         public async Task<SDImage> ImageRequest(string jsonReqeustString)
         {
-
-
+            if (!IsServerRunning("127.0.0.1", 7860))
+            {
+                // message box
+                MessageBox.Show("Stable Diffusion API is not running,                 -    We failed inside       -   Should not happen     -   *     *     .");
+                return null;
+            }
 
             using (var client = new HttpClient())
             {
@@ -80,8 +87,27 @@ namespace StabSharp
             }
         }
 
+        public async Task<int> GetProgress()
+        {
 
-
+            using (var client = new HttpClient())
+            {
+                var response = await client.GetAsync("http://127.0.0.1:7860/sdapi/v1/progress?skip_current_image=false");
+                if (response.IsSuccessStatusCode)
+                {
+                    string progressData = await response.Content.ReadAsStringAsync();
+                    dynamic progressJson = JsonConvert.DeserializeObject(progressData);
+                    double progress = progressJson.progress;
+                    int progressPercentage = (int)(progress * 100);
+                    return progressPercentage;
+                }
+                else
+                {
+                    // Consider throwing an exception or returning a default value to indicate failure.
+                    return -1;
+                }
+            }
+        }
 
         string GetNextImageNumberForFileName(bool isNewImageFile)
         {
@@ -150,6 +176,19 @@ namespace StabSharp
             sb.Append("}");
             return sb.ToString();
 
+        }
+
+        public bool IsServerRunning(string server, int port)
+        {
+            try
+            {
+                using (var client = new TcpClient(server, port))
+                    return true;
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
         }
 
     }

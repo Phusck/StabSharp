@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StabSharp
 {
-    internal class PromptPart : ICloneable
+    public class PromptPart : ICloneable
     {
         public string Text;
         public float Weight;

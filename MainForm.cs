@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.AxHost;
 
@@ -14,9 +17,12 @@ namespace StabSharp
 {
     public partial class MainForm : Form
     {
-        StableDiffusionAPI sdapi = new StableDiffusionAPI();
-        List<SDImage> generatedImages = new List<SDImage>();
-        List<Request> requestQueue = new List<Request>();
+        private StableDiffusionAPI sdapi = new StableDiffusionAPI();
+        private List<SDImage> generatedImages = new List<SDImage>();
+        private List<Request> requestQueue = new List<Request>();
+        private Request currentRequest;
+        private bool isUdatingProgress = false;
+
 
         //TODO: Move this to StableDiffusionAPI
         private bool stableDiffusionAPIReady = true;
@@ -27,12 +33,12 @@ namespace StabSharp
         {
             InitializeComponent();
             listView1.View = View.Details;
-            listView1.Columns.Add("Image                                 ",0);
-            listView1.Columns.Add("Seed",50);
+            listView1.Columns.Add("Image                                 ", 0);
+            listView1.Columns.Add("Seed", 50);
             listView1.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
         }
 
-        private void populateListView()
+        private void populateImageListView()
         {
             // Only create a new ImageList if it is null or needs to be refreshed completely
             if (listView1.SmallImageList == null || needRefresh)
@@ -74,54 +80,80 @@ namespace StabSharp
             }
         }
 
-        private void populateReqestQueue()
+        private void UpdateRequestOverview()
         {
             listboxRequests.DataSource = null;
             listboxRequests.DataSource = requestQueue;
+            if (currentRequest != null)
+            {
+                textBoxCurrentRequest.Text = currentRequest?.ToString();
+            }
+            else
+            {
+                textBoxCurrentRequest.Text = "";
+            }
         }
 
-        public void AddTextToImageRequestToQueue(string prompt, string negativePrompt, bool doHires = false, int seed = -1)
+        public void AddTextToImageRequestToQueue(string prompt, string negativePrompt, bool doHires, int seed, int steps)
         {
+            // Remove newlines and trailing whitespace from the prompt
             prompt = prompt.Replace("\r\n", "");
             prompt = prompt.Trim();
-
-            requestQueue.Add(new Request(RequestType.TextToImage, sdapi.RequestTxtToImg(prompt, negativePrompt, doHires, seed)));
-
-            populateReqestQueue();
+            requestQueue.Add(new Request(RequestType.TextToImage, sdapi.RequestTxtToImg(prompt, negativePrompt, doHires, seed ,steps)));
 
             if (stableDiffusionAPIReady)
             {
                 popFromQueue();
             }
-
-
+            else
+            {
+                UpdateRequestOverview();
+            }
         }
 
         private async void popFromQueue()
         {
+            // Check if the API is ready to process a new request (currently just set by this program, not by the API)
             if (!stableDiffusionAPIReady)
             {
                 MessageBox.Show("Tried to pop from Queue when not ready, this should not happen");
                 return;
             }
-
+            // Check if the queue is empty
             if (requestQueue.Count == 0)
             {
                 return;
             }
+            // Check if the server is running
+            if (!sdapi.IsServerRunning("127.0.0.1", 7860))
+            {
+                MessageBox.Show("Stable Diffusion API is not running");
+                return;
+            }
 
             stableDiffusionAPIReady = false;
-            Request request = requestQueue[0];
+            currentRequest = requestQueue[0];
             requestQueue.RemoveAt(0);
-            if (request.RequestType == RequestType.TextToImage)
+            UpdateRequestOverview();
+
+            if (currentRequest.RequestType == RequestType.TextToImage)
             {
-                var generatedImage = await sdapi.ImageRequest(request.Prompt);
+                isUdatingProgress = true;
+                updateProgress();
+                var generatedImage = await sdapi.ImageRequest(currentRequest.Prompt);
+                isUdatingProgress = false;
+                if (generatedImage == null)
+                {
+                    stableDiffusionAPIReady = true;
+                    return;
+                }
                 if (!string.IsNullOrEmpty(generatedImage.ImagePath))
                 {
                     generatedImages.Add(generatedImage);
 
                     // Update the existing PictureBox with the new image.
-                    this.Invoke(new Action(() => {
+                    this.Invoke(new Action(() =>
+                    {
                         using (Image newImage = Image.FromFile(generatedImage.ImagePath))
                         {
                             if (pictureBox1.Image != null)
@@ -137,7 +169,7 @@ namespace StabSharp
                         }
                     }));
 
-                    populateListView();
+                    populateImageListView();
                     stableDiffusionAPIReady = true;
                 }
                 else
@@ -149,7 +181,8 @@ namespace StabSharp
             {
                 MessageBox.Show("Unknown request type");
             }
-            populateReqestQueue();
+
+            UpdateRequestOverview();
             if (requestQueue.Count != 0)
             {
                 popFromQueue();
@@ -162,12 +195,24 @@ namespace StabSharp
             InputForm inputForm = new InputForm(this);
             inputForm.Show();
         }
+        private void buttonNewPonyInputform_Click(object sender, EventArgs e)
+        {
+            //Create a new InputForm
+            InputForm inputForm = new InputForm(this);
+            ObservableCollection<PromptPart> promptParts = new ObservableCollection<PromptPart>();
+            promptParts.Add(new PromptPart("Score_9", 1f, 0, false));
+            promptParts.Add(new PromptPart("Score_8_up", 1f, 0, false));
+            promptParts.Add(new PromptPart("Score_7_up", 1f, 0, false));
+            promptParts.Add(new PromptPart("StylesForPonyDiffusion", 1f, 0, true));
+            inputForm.Show();
+            inputForm.SetupForm(promptParts, "score_6, score_5, score_4, pony, black and white, muscular, censored, furry, 3d,simple background");
+        }
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listView1.SelectedItems.Count == 1) 
+            if (listView1.SelectedItems.Count == 1)
             {
-                int index = generatedImages.Count-1-listView1.SelectedIndices[0];
+                int index = generatedImages.Count - 1 - listView1.SelectedIndices[0];
 
                 pictureBox1.Image = Image.FromFile(generatedImages[index].ImagePath);
             }
@@ -179,7 +224,8 @@ namespace StabSharp
             if (listView1.SelectedItems.Count == 1)
             {
                 SDImage sdi = generatedImages[generatedImages.Count - 1 - listView1.SelectedIndices[0]];
-                AddTextToImageRequestToQueue(sdi.Parameters.prompt, sdi.Parameters.negative_prompt,true, sdi.Parameters.Seed);
+                //TODO: Fix the 
+                AddTextToImageRequestToQueue(sdi.Parameters.prompt, sdi.Parameters.negative_prompt, true, sdi.Parameters.Seed,(int)sdi.Parameters.steps);
             }
         }
 
@@ -213,5 +259,21 @@ namespace StabSharp
                 SaveSystem.SaveCopyOfFileToSaveFolder(sourceFile);
             }
         }
+
+        private async void updateProgress()
+        {
+            if (isUdatingProgress)
+            {
+                var progress = await sdapi.GetProgress();
+                progressBarCurrentRequest.Value = progress;
+                await Task.Delay(500);
+                updateProgress();
+            }
+            else
+            {
+                progressBarCurrentRequest.Value = 0;
+            }
+        }
+
     }
 }

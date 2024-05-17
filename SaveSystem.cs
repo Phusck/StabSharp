@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.ExceptionServices;
 
 
@@ -13,6 +14,7 @@ namespace StabSharp
         private const string CATEGORIESFILE = "D:/StabSharp/categories.json";
         private const string LORASFILE = "D:/StabSharp/loras.json";
         private const string SAVEDIMAGESFOLDER = "D:/StabSharp/Saved/";
+        private string[] stringsToIgnorre = { "New Category", "New Prompt Part", "New Lora Part", "New Lora Part" };
 
 
         public static void SaveCategoriesToJson(ObservableCollection<PromptPartCategory> categories)

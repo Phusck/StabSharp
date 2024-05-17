@@ -81,8 +81,16 @@ namespace StabSharp
 
         private void buttonGenerate_Click(object sender, EventArgs e)
         {
+            Generate();
+        }
+
+        private void Generate()
+        {
+            //Save the prompt parts and loras to a file
             SaveSystem.SafeSaveCategoriesToJson(promptPartCategories);
             SaveSystem.SafeSaveLorasToJson(loras);
+
+            //If checkBoxIgnorrePromptParts is not checked, update the prompt text with from the prompt parts
             if (!checkBoxIgnorrePromptParts.Checked)
             {
                 if (promptParts.Count == 0)
@@ -100,9 +108,10 @@ namespace StabSharp
                 textBoxPrompt.Text = sb.ToString();
                 checkBoxIgnorrePromptParts.Checked = false;
             }
-
-            mainForm.AddTextToImageRequestToQueue(textBoxPrompt.Text, textBoxNegativePrompt.Text);
+            //Add the prompt to the request queue
+            mainForm.AddTextToImageRequestToQueue(textBoxPrompt.Text, textBoxNegativePrompt.Text,false,-1,trackBarSteps.Value);
         }
+
         private void buttonNewCategory_Click(object sender, EventArgs e)
         {
             promptPartCategories.Add(new PromptPartCategory("New Category"));
@@ -523,7 +532,17 @@ namespace StabSharp
             loras[listBoxLoras.SelectedIndex].Parts.RemoveAt(listBoxLoraParts.SelectedIndex);
             refreshListBoxPromptsFromLora(false);
         }
+
+        public void SetupForm(ObservableCollection<PromptPart> prompts, string negativeprompts)
+        {
+            promptParts = prompts;
+            refreshListBoxPromptParts(false);
+            textBoxNegativePrompt.Text = negativeprompts;
+        }
+
+        private void trackBarSteps_Scroll(object sender, EventArgs e)
+        {
+            textBoxSteps.Text = trackBarSteps.Value.ToString();
+        }
     }
-
-
 }
