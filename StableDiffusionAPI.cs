@@ -116,8 +116,11 @@ namespace StabSharp
 
             int maxImageNumber = 0;
 
+            if (!Directory.Exists(myPersistentDataPath))
+            {
+                Directory.CreateDirectory(myPersistentDataPath);
+            }
             string[] files = Directory.GetFiles(myPersistentDataPath);
-
             foreach (string file in files)
             {
                 FileInfo fi = new FileInfo(file);
