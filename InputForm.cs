@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -23,6 +24,28 @@ namespace StabSharp
         private ObservableCollection<Lora> loras = new ObservableCollection<Lora>();
 
         private string[] yaks = { "Yakuza", "Manyak", "Yak of all trades", "Yak Nicholson", "Yak Costau", "Yak Black" };
+        public string[] samplingMethods = {
+            "Euler a",
+            "Euler",
+            "LMS",
+            "Heun",
+            "DPM2",
+            "DPM2 a",
+            "DPM++ 2S a",
+            "DPM++ 2M",
+            "DPM fast",
+            "DPM adaptive",
+            "LMS Karras",
+            "DPM2 Karras",
+            "DPM2 a Karras",
+            "DPM++ 2S a Karras",
+            "DPM++ 2M Karras",
+            "DDIM",
+            "PLMS",
+            "DPM++ 3M SDE Exponential"
+        };
+
+
 
 
         public InputForm(MainForm mainform)
@@ -37,6 +60,8 @@ namespace StabSharp
             listBoxCategory.MouseWheel += MouseWheelOnPromptPartsCategory;
             noScrollListBoxPromptParts.DataSource = promptParts;
             textBoxPrompt.AcceptsReturn = false;
+            comboBoxSamplingMethod.DataSource = samplingMethods;
+            comboBoxSamplingMethod.SelectedIndex = 0;
 
             this.AcceptButton = buttonGenerate;
         }
@@ -109,7 +134,7 @@ namespace StabSharp
                 checkBoxIgnorrePromptParts.Checked = false;
             }
             //Add the prompt to the request queue
-            mainForm.AddTextToImageRequestToQueue(textBoxPrompt.Text, textBoxNegativePrompt.Text,false,-1,trackBarSteps.Value);
+            mainForm.AddTextToImageRequestToQueue(textBoxPrompt.Text, textBoxNegativePrompt.Text, false, -1, trackBarSteps.Value, samplingMethods[comboBoxSamplingMethod.SelectedIndex],checkBoxClipSkip.Checked,(int)numericUpDownClipSkip.Value);
         }
 
         private void buttonNewCategory_Click(object sender, EventArgs e)
@@ -444,7 +469,7 @@ namespace StabSharp
             refreshTextBoxPromptPartWeight();
             refreshListBoxPromptsFromCategory(true);
         }
-        private void trackBarNumberOfParantheses_Scroll(object sender, EventArgs e)
+        private void trackBarNumberOfParentheses_Scroll(object sender, EventArgs e)
         {
             if (listBoxPromptsFromCatergory.SelectedIndex == -1)
             {
@@ -466,7 +491,7 @@ namespace StabSharp
             refreshListBoxPromptsFromLora(true);
 
         }
-        private void trackBarLoraPartNumberOfParantheses_Scroll(object sender, EventArgs e)
+        private void trackBarLoraPartNumberOfParentheses_Scroll(object sender, EventArgs e)
         {
             if (listBoxLoraParts.SelectedIndex == -1)
             {
@@ -505,7 +530,7 @@ namespace StabSharp
 
         private void checkBoxIsLora_CheckedChanged(object sender, EventArgs e)
         {
-            if(listBoxLoraParts.SelectedIndex == -1)
+            if (listBoxLoraParts.SelectedIndex == -1)
             {
                 return;
             }
@@ -543,6 +568,58 @@ namespace StabSharp
         private void trackBarSteps_Scroll(object sender, EventArgs e)
         {
             textBoxSteps.Text = trackBarSteps.Value.ToString();
+        }
+
+        private void buttonAddFromClipBoard_Click(object sender, EventArgs e)
+        {
+            string clipboardText = Clipboard.GetText();
+            string[] parts = clipboardText.Split(',');
+            foreach (string part in parts)
+            {
+                if (!string.IsNullOrEmpty(part.Trim()))
+                {
+                    promptParts.Add(new PromptPart(part.Trim()));
+                }
+            }
+            refreshListBoxPromptParts(false);
+        }
+
+        private void numericUpDownClipSkip_ValueChanged(object sender, EventArgs e)
+        {
+            checkBoxClipSkip.Checked = true;
+        }
+
+        private void textBoxSelectedPromptPart_TextChanged(object sender, EventArgs e)
+        {
+            if (noScrollListBoxPromptParts.SelectedIndex != -1)
+            {
+                promptParts[noScrollListBoxPromptParts.SelectedIndex].Text = textBoxSelectedPromptPart.Text;
+
+            }
+        }
+
+        private void noScrollListBoxPromptParts_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (noScrollListBoxPromptParts.SelectedIndex == -1)
+            {
+                textBoxSelectedPromptPart.Text = "";
+                return;
+            }
+            
+            textBoxSelectedPromptPart.Text = promptParts[noScrollListBoxPromptParts.SelectedIndex].Text;
+        }
+
+        private void textBoxSelectedPromptPart_Leave(object sender, EventArgs e)
+        {
+            refreshListBoxPromptParts(true);
+        }
+
+        private void buttonAddCustom_Click(object sender, EventArgs e)
+        {
+            promptParts.Add(new PromptPart("new Custom Prompt Part"));
+            refreshListBoxPromptParts(false);
+            noScrollListBoxPromptParts.SelectedIndex = noScrollListBoxPromptParts.Items.Count - 1;
+            textBoxSelectedPromptPart.Select();
         }
     }
 }

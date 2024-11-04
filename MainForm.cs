@@ -64,6 +64,9 @@ namespace StabSharp
                 listView1.SmallImageList = imgs; // Assign the newly created ImageList to the ListView
             }
 
+            //save the current selection
+            int listIndex = listView1.SelectedIndices.Count > 0 ? listView1.SelectedIndices[0] : -1;
+
             // Update the ListView items
             listView1.Items.Clear();
             for (int i = generatedImages.Count - 1; i > -1; i--)
@@ -71,11 +74,11 @@ namespace StabSharp
                 listView1.Items.Add(generatedImages[i].Parameters.Seed.ToString(), i);
             }
 
+
             // Restore selection if applicable
-            int listIndex = listView1.SelectedIndices.Count > 0 ? listView1.SelectedIndices[0] : -1;
-            if (listIndex != -1 && listIndex < listView1.Items.Count)
+            if (!checkBoxShowNewest.Checked && listIndex != -1 && listIndex < listView1.Items.Count)
             {
-                listView1.Items[listIndex].Selected = true;
+                listView1.Items[listIndex+1].Selected = true;
                 listView1.EnsureVisible(listIndex);
             }
         }
@@ -94,12 +97,12 @@ namespace StabSharp
             }
         }
 
-        public void AddTextToImageRequestToQueue(string prompt, string negativePrompt, bool doHires, int seed, int steps)
+        public void AddTextToImageRequestToQueue(string prompt, string negativePrompt, bool doHires, int seed, int steps, string sampler, bool doClipSkip, int clipSkipNumber)
         {
             // Remove newlines and trailing whitespace from the prompt
             prompt = prompt.Replace("\r\n", "");
             prompt = prompt.Trim();
-            requestQueue.Add(new Request(RequestType.TextToImage, sdapi.RequestTxtToImg(prompt, negativePrompt, doHires, seed ,steps)));
+            requestQueue.Add(new Request(RequestType.TextToImage, sdapi.RequestTxtToImg(prompt, negativePrompt, doHires, seed, steps, sampler, doClipSkip, clipSkipNumber)));
 
             if (stableDiffusionAPIReady)
             {
@@ -199,11 +202,13 @@ namespace StabSharp
         {
             //Create a new InputForm
             InputForm inputForm = new InputForm(this);
-            ObservableCollection<PromptPart> promptParts = new ObservableCollection<PromptPart>();
-            promptParts.Add(new PromptPart("Score_9", 1f, 0, false));
-            promptParts.Add(new PromptPart("Score_8_up", 1f, 0, false));
-            promptParts.Add(new PromptPart("Score_7_up", 1f, 0, false));
-            promptParts.Add(new PromptPart("StylesForPonyDiffusion", 1f, 0, true));
+            ObservableCollection<PromptPart> promptParts = new ObservableCollection<PromptPart>
+            {
+                new PromptPart("Score_9", 1f, 0, false),
+                new PromptPart("Score_8_up", 1f, 0, false),
+                new PromptPart("Score_7_up", 1f, 0, false),
+                new PromptPart("StylesForPonyDiffusion", 1f, 0, true)
+            };
             inputForm.Show();
             inputForm.SetupForm(promptParts, "score_6, score_5, score_4, pony, black and white, muscular, censored, furry, 3d,simple background");
         }
@@ -225,7 +230,8 @@ namespace StabSharp
             {
                 SDImage sdi = generatedImages[generatedImages.Count - 1 - listView1.SelectedIndices[0]];
                 //TODO: Fix the 
-                AddTextToImageRequestToQueue(sdi.Parameters.prompt, sdi.Parameters.negative_prompt, true, sdi.Parameters.Seed,(int)sdi.Parameters.steps);
+                AddTextToImageRequestToQueue(sdi.Parameters.prompt, sdi.Parameters.negative_prompt, true, sdi.Parameters.Seed,(int)sdi.Parameters.steps,(string)sdi.Parameters.sampler_name, false, sdi.Parameters.clip_skip);
+                MessageBox.Show("Fix Clip Skip for HighRes");
             }
         }
 
@@ -236,7 +242,7 @@ namespace StabSharp
 
         private void linkLabelLoras_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("explorer.exe", "D:\\Back up - Desktop\\stable-diffusion-webui\\models\\Lora\\");
+            Process.Start("explorer.exe", "D:\\stable-diffusion-webui\\models\\Lora\\");
         }
 
         private void linkLabelDownloads_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -246,7 +252,7 @@ namespace StabSharp
 
         private void linkLabelModels_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("explorer.exe", "D:\\Back up - Desktop\\stable-diffusion-webui\\models\\Stable-diffusion");
+            Process.Start("explorer.exe", "D:\\stable-diffusion-webui\\models\\Stable-diffusion");
         }
 
         private void buttonMoveToSave_Click(object sender, EventArgs e)
@@ -275,5 +281,16 @@ namespace StabSharp
             }
         }
 
+        private void listView1_MouseClick(object sender, MouseEventArgs e)
+        {
+            checkBoxShowNewest.Checked = true;
+        }
+
+        private void buttonDecimateImage_Click(object sender, EventArgs e)
+        {
+            //Create a new DecimateForm
+            DecimateForm decimateForm = new DecimateForm();
+            decimateForm.Show();
+        }
     }
 }

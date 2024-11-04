@@ -16,22 +16,35 @@ namespace StabSharp
     {
         const string myPersistentDataPath = "C:/TempTemp";
 
-        public string RequestTxtToImg(string prompt, string negativePrompt, bool doHires, int seed, int steps)
+        public string RequestTxtToImg(string prompt, string negativePrompt, bool doHires, int seed, int steps, string sampler, bool doClipSkip, int clipSkipNumber)
         {
-            return MakeRequest(prompt, negativePrompt, doHires, seed,steps);
+            return MakeRequest(prompt, negativePrompt, doHires, seed,steps, sampler,doClipSkip,clipSkipNumber);
         }
 
 
-        private string MakeRequest(string prompt, string negativePrompt, bool doHires, int seed, int steps)
+        private string MakeRequest(string prompt, string negativePrompt, bool doHires, int seed, int steps, string sampler, bool doClipSkip, int clipSkipNumber)
         {
+
 
             Random random = new Random();
 
 
-            Dictionary<string, string> requestData = new Dictionary<string, string>();
-            requestData.Add("prompt", prompt);
-            requestData.Add("steps", steps.ToString());
-            requestData.Add("negative_prompt", negativePrompt);
+            Dictionary<string, string> requestData = new Dictionary<string, string>
+            {
+                { "prompt", prompt },
+                { "steps", steps.ToString() },
+                { "negative_prompt", negativePrompt },
+                { "sampler_name", sampler },
+                { "sampler_index", sampler }
+            };
+            if (doClipSkip)
+            {
+                requestData.Add("clip_skip", clipSkipNumber.ToString());
+            }
+
+
+
+            
             if (seed == -1)
             {
                 requestData.Add("seed", random.Next().ToString());
@@ -114,7 +127,7 @@ namespace StabSharp
             List<int> imageNumbers = new List<int>();
 
 
-            int maxImageNumber = 0;
+            int maxImageNumber;
 
             if (!Directory.Exists(myPersistentDataPath))
             {
@@ -186,7 +199,9 @@ namespace StabSharp
             try
             {
                 using (var client = new TcpClient(server, port))
+                {
                     return true;
+                }
             }
             catch (SocketException)
             {
@@ -227,6 +242,7 @@ namespace StabSharp
         public double? s_noise { get; set; }
         public object override_settings { get; set; }
         public string sampler_index { get; set; }
+        public int clip_skip { get; set; }
     }
 
     public class ImageData
