@@ -26,6 +26,7 @@ namespace StabSharp
         private string[] yaks = { "Yakuza", "Manyak", "Yak of all trades", "Yak Nicholson", "Yak Costau", "Yak Black" };
         public string[] samplingMethods = {
             "Euler a",
+            "DPM++ SDE",
             "Euler",
             "LMS",
             "Heun",
@@ -44,6 +45,15 @@ namespace StabSharp
             "PLMS",
             "DPM++ 3M SDE Exponential"
         };
+
+        public ObservableCollection<PromptPart> PromptParts
+        {
+            get => promptParts;
+        }
+        public string NegativePrompt
+        {
+            get => textBoxNegativePrompt.Text;
+        }
 
 
 
@@ -107,6 +117,7 @@ namespace StabSharp
         private void buttonGenerate_Click(object sender, EventArgs e)
         {
             Generate();
+            SaveSystem.SaveLastPromptSetup(this);
         }
 
         private void Generate()
@@ -134,7 +145,7 @@ namespace StabSharp
                 checkBoxIgnorrePromptParts.Checked = false;
             }
             //Add the prompt to the request queue
-            mainForm.AddTextToImageRequestToQueue(textBoxPrompt.Text, textBoxNegativePrompt.Text, false, -1, trackBarSteps.Value, samplingMethods[comboBoxSamplingMethod.SelectedIndex],checkBoxClipSkip.Checked,(int)numericUpDownClipSkip.Value);
+            mainForm.AddTextToImageRequestToQueue(textBoxPrompt.Text, textBoxNegativePrompt.Text, false, -1, trackBarSteps.Value, samplingMethods[comboBoxSamplingMethod.SelectedIndex], checkBoxClipSkip.Checked, (int)numericUpDownClipSkip.Value);
         }
 
         private void buttonNewCategory_Click(object sender, EventArgs e)
@@ -190,6 +201,18 @@ namespace StabSharp
             refreshListBoxPromptsFromLora(true);
             listBoxLoraParts.SelectedIndex = listBoxLoraParts.Items.Count - 1;
 
+        }
+        private void buttonAddListOfPromptPartsFromClipBoard_Click(object sender, EventArgs e)
+        {
+            if (listBoxLoras.SelectedIndex == -1)
+            {
+                return;
+            }
+            foreach (string part in ClipBoardHelper.GetCommaSeperatedStrings())
+            {
+                loras[listBoxLoras.SelectedIndex].Parts.Add(new PromptPart(part));
+            }
+            refreshListBoxPromptsFromLora(true);
         }
 
         //Listbox Clicked
@@ -342,9 +365,10 @@ namespace StabSharp
             {
                 return;
             }
+
             if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
             {
-                //Move Selected index 
+                // Move Selected index
                 if (delta < 0)
                 {
                     if (noScrollListBoxPromptParts.SelectedIndex == promptParts.Count - 1)
@@ -353,7 +377,6 @@ namespace StabSharp
                     }
                     promptParts.Move(noScrollListBoxPromptParts.SelectedIndex, noScrollListBoxPromptParts.SelectedIndex + 1);
                     noScrollListBoxPromptParts.SelectedIndex++;
-
                 }
                 else
                 {
@@ -369,11 +392,15 @@ namespace StabSharp
             {
                 delta = Math.Min(0.05f, delta);
                 delta = Math.Max(-0.05f, delta);
-                promptParts[noScrollListBoxPromptParts.SelectedIndex].Weight += delta;
+
+                // Retrieve the struct, modify it, and update it back
+                var selectedIndex = noScrollListBoxPromptParts.SelectedIndex;
+                var selectedPromptPart = promptParts[selectedIndex]; // Retrieve by value
+                selectedPromptPart.Weight += delta;                 // Modify property
+                promptParts[selectedIndex] = selectedPromptPart;    // Reassign back
             }
 
             refreshListBoxPromptParts(true);
-
         }
 
         private void textBoxPrompt_TextChanged(object sender, EventArgs e)
@@ -382,14 +409,26 @@ namespace StabSharp
         }
         private void textBoxPromptPartName_TextChanged(object sender, EventArgs e)
         {
-            //Change the name of the prompt part
+            // Change the name of the prompt part
             if (listBoxPromptsFromCatergory.SelectedIndex == -1)
             {
                 return;
             }
-            promptPartCategories[listBoxCategory.SelectedIndex].PromptParts[listBoxPromptsFromCatergory.SelectedIndex].Text = textBoxPromptPartName.Text;
+
+            // Retrieve the struct by value
+            var selectedCategory = promptPartCategories[listBoxCategory.SelectedIndex];
+            var selectedPromptPart = selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex];
+
+            // Modify the struct's property
+            selectedPromptPart.Text = textBoxPromptPartName.Text;
+
+            // Update the struct back into the collection
+            selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex] = selectedPromptPart;
+            promptPartCategories[listBoxCategory.SelectedIndex] = selectedCategory;
+
             refreshListBoxPromptsFromCategory(true);
         }
+
         private void textBoxPromptPartCategoryName_TextChanged(object sender, EventArgs e)
         {
             if (listBoxCategory.SelectedIndex == -1)
@@ -459,46 +498,86 @@ namespace StabSharp
 
         private void trackBarPromptPartWeight_Scroll(object sender, EventArgs e)
         {
-            //round to nearest 5
+            // Round to the nearest 5
             trackBarPromptPartWeight.Value = (int)(Math.Round(trackBarPromptPartWeight.Value / 5.0) * 5);
+
             if (listBoxPromptsFromCatergory.SelectedIndex == -1)
             {
                 return;
             }
-            promptPartCategories[listBoxCategory.SelectedIndex].PromptParts[listBoxPromptsFromCatergory.SelectedIndex].Weight = trackBarPromptPartWeight.Value / 100f;
+
+            // Retrieve the struct, modify it, and update it back
+            var selectedCategory = promptPartCategories[listBoxCategory.SelectedIndex];
+            var selectedPromptPart = selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex]; // Retrieve by value
+
+            selectedPromptPart.Weight = trackBarPromptPartWeight.Value / 100f; // Modify property
+
+            selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex] = selectedPromptPart; // Reassign back
+            promptPartCategories[listBoxCategory.SelectedIndex] = selectedCategory;
+
             refreshTextBoxPromptPartWeight();
             refreshListBoxPromptsFromCategory(true);
         }
+
         private void trackBarNumberOfParentheses_Scroll(object sender, EventArgs e)
         {
             if (listBoxPromptsFromCatergory.SelectedIndex == -1)
             {
                 return;
             }
-            promptPartCategories[listBoxCategory.SelectedIndex].PromptParts[listBoxPromptsFromCatergory.SelectedIndex].QuantityOfParantheses = trackBarNumberOfParantheses.Value;
+
+            // Retrieve the struct, modify it, and update it back
+            var selectedCategory = promptPartCategories[listBoxCategory.SelectedIndex];
+            var selectedPromptPart = selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex]; // Retrieve by value
+
+            selectedPromptPart.QuantityOfParantheses = trackBarNumberOfParantheses.Value; // Modify property
+
+            selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex] = selectedPromptPart; // Reassign back
+            promptPartCategories[listBoxCategory.SelectedIndex] = selectedCategory;
+
             refreshListBoxPromptsFromCategory(true);
         }
+
         private void trackBarLoraPartWeight_Scroll(object sender, EventArgs e)
         {
-            //round to nearest 5
+            // Round to the nearest 5
             trackBarLoraPartWeight.Value = (int)(Math.Round(trackBarLoraPartWeight.Value / 5.0) * 5);
+
             if (listBoxLoraParts.SelectedIndex == -1)
             {
                 return;
             }
-            loras[listBoxLoras.SelectedIndex].Parts[listBoxLoraParts.SelectedIndex].Weight = trackBarLoraPartWeight.Value / 100f;
+
+            // Retrieve the struct, modify it, and update it back
+            var selectedLora = loras[listBoxLoras.SelectedIndex];
+            var selectedPart = selectedLora.Parts[listBoxLoraParts.SelectedIndex]; // Retrieve by value
+
+            selectedPart.Weight = trackBarLoraPartWeight.Value / 100f; // Modify property
+
+            selectedLora.Parts[listBoxLoraParts.SelectedIndex] = selectedPart; // Reassign back
+            loras[listBoxLoras.SelectedIndex] = selectedLora;
+
             refreshTextBoxLoraPartWeight();
             refreshListBoxPromptsFromLora(true);
-
         }
+
         private void trackBarLoraPartNumberOfParentheses_Scroll(object sender, EventArgs e)
         {
             if (listBoxLoraParts.SelectedIndex == -1)
             {
                 return;
             }
-            loras[listBoxLoras.SelectedIndex].Parts[listBoxLoraParts.SelectedIndex].QuantityOfParantheses = trackBarNumberOfParantheses.Value;
+
+            // Retrieve the struct, modify it, and update it back
+            var selectedLora = loras[listBoxLoras.SelectedIndex];
+            var selectedPart = selectedLora.Parts[listBoxLoraParts.SelectedIndex]; // Retrieve by value
+
+            selectedPart.QuantityOfParantheses = trackBarNumberOfParantheses.Value; // Modify property
+
+            selectedLora.Parts[listBoxLoraParts.SelectedIndex] = selectedPart; // Reassign back
+            loras[listBoxLoras.SelectedIndex] = selectedLora;
         }
+
 
 
         private void refreshTextBoxPromptPartWeight()
@@ -524,9 +603,19 @@ namespace StabSharp
             {
                 return;
             }
-            loras[listBoxLoras.SelectedIndex].Parts[listBoxLoraParts.SelectedIndex].Text = textBoxLoraPartText.Text;
+
+            // Retrieve the struct, modify it, and update it back
+            var selectedLora = loras[listBoxLoras.SelectedIndex];
+            var selectedPart = selectedLora.Parts[listBoxLoraParts.SelectedIndex]; // Retrieve by value
+
+            selectedPart.Text = textBoxLoraPartText.Text; // Modify property
+
+            selectedLora.Parts[listBoxLoraParts.SelectedIndex] = selectedPart; // Reassign back
+            loras[listBoxLoras.SelectedIndex] = selectedLora;
+
             refreshListBoxPromptsFromLora(true);
         }
+
 
         private void checkBoxIsLora_CheckedChanged(object sender, EventArgs e)
         {
@@ -534,9 +623,22 @@ namespace StabSharp
             {
                 return;
             }
-            loras[listBoxLoras.SelectedIndex].Parts[listBoxLoraParts.SelectedIndex].IsLora = checkBoxIsLora.Checked;
+
+            // Retrieve the struct, modify it, and update it back
+            var selectedLora = loras[listBoxLoras.SelectedIndex];
+            var selectedPart = selectedLora.Parts[listBoxLoraParts.SelectedIndex]; // Retrieve by value
+
+            // Update the IsLora property
+            selectedPart.IsLora = checkBoxIsLora.Checked; // Modify property
+
+            // Reassign the modified part back
+            selectedLora.Parts[listBoxLoraParts.SelectedIndex] = selectedPart; // Reassign updated part
+            loras[listBoxLoras.SelectedIndex] = selectedLora; // Reassign updated Lora
+
+            // Refresh the UI
             refreshListBoxPromptsFromLora(true);
         }
+
 
         private void buttonDeleteLora_Click(object sender, EventArgs e)
         {
@@ -572,14 +674,9 @@ namespace StabSharp
 
         private void buttonAddFromClipBoard_Click(object sender, EventArgs e)
         {
-            string clipboardText = Clipboard.GetText();
-            string[] parts = clipboardText.Split(',');
-            foreach (string part in parts)
+            foreach (string part in ClipBoardHelper.GetCommaSeperatedStrings())
             {
-                if (!string.IsNullOrEmpty(part.Trim()))
-                {
-                    promptParts.Add(new PromptPart(part.Trim()));
-                }
+                promptParts.Add(new PromptPart(part));
             }
             refreshListBoxPromptParts(false);
         }
@@ -593,8 +690,14 @@ namespace StabSharp
         {
             if (noScrollListBoxPromptParts.SelectedIndex != -1)
             {
-                promptParts[noScrollListBoxPromptParts.SelectedIndex].Text = textBoxSelectedPromptPart.Text;
+                // Get the selected PromptPart from the list
+                PromptPart selectedPromptPart = promptParts[noScrollListBoxPromptParts.SelectedIndex];
 
+                // Modify the Text property of the struct
+                selectedPromptPart.Text = textBoxSelectedPromptPart.Text;
+
+                // Update the list with the modified struct
+                promptParts[noScrollListBoxPromptParts.SelectedIndex] = selectedPromptPart;
             }
         }
 
@@ -605,7 +708,7 @@ namespace StabSharp
                 textBoxSelectedPromptPart.Text = "";
                 return;
             }
-            
+
             textBoxSelectedPromptPart.Text = promptParts[noScrollListBoxPromptParts.SelectedIndex].Text;
         }
 
@@ -621,5 +724,7 @@ namespace StabSharp
             noScrollListBoxPromptParts.SelectedIndex = noScrollListBoxPromptParts.Items.Count - 1;
             textBoxSelectedPromptPart.Select();
         }
+
+
     }
 }

@@ -23,11 +23,9 @@ namespace StabSharp
         private Request currentRequest;
         private bool isUdatingProgress = false;
 
-
         //TODO: Move this to StableDiffusionAPI
         private bool stableDiffusionAPIReady = true;
         private bool needRefresh = true;
-
 
         public MainForm()
         {
@@ -38,48 +36,34 @@ namespace StabSharp
             listView1.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
         }
 
+        private ImageList GenerateImageList()
+        {
+            var imageList = new ImageList { ImageSize = new Size(100, 100) };
+            foreach (var image in generatedImages)
+            {
+                try
+                {
+                    var img = Image.FromFile(image.ImagePath);
+                    imageList.Images.Add(img);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error loading image: {ex.Message}");
+                }
+            }
+            return imageList;
+        }
         private void populateImageListView()
         {
-            // Only create a new ImageList if it is null or needs to be refreshed completely
             if (listView1.SmallImageList == null || needRefresh)
             {
-                ImageList imgs = new ImageList();
-                imgs.ImageSize = new Size(100, 100);
-
-                foreach (SDImage image in generatedImages)
-                {
-                    try
-                    {
-                        Image img = Image.FromFile(image.ImagePath); // Load the image
-                        imgs.Images.Add(img); // Add the image to the ImageList
-                                              // Do not dispose here as the ImageList needs to use the image
-                    }
-                    catch (Exception ex)
-                    {
-                        // Handle exceptions (e.g., log them)
-                        Console.WriteLine("Error loading image: " + ex.Message);
-                    }
-                }
-
-                listView1.SmallImageList = imgs; // Assign the newly created ImageList to the ListView
+                listView1.SmallImageList = GenerateImageList();
             }
 
-            //save the current selection
-            int listIndex = listView1.SelectedIndices.Count > 0 ? listView1.SelectedIndices[0] : -1;
-
-            // Update the ListView items
             listView1.Items.Clear();
-            for (int i = generatedImages.Count - 1; i > -1; i--)
+            for (int i = generatedImages.Count - 1; i >= 0; i--)
             {
                 listView1.Items.Add(generatedImages[i].Parameters.Seed.ToString(), i);
-            }
-
-
-            // Restore selection if applicable
-            if (!checkBoxShowNewest.Checked && listIndex != -1 && listIndex < listView1.Items.Count)
-            {
-                listView1.Items[listIndex+1].Selected = true;
-                listView1.EnsureVisible(listIndex);
             }
         }
 
@@ -114,6 +98,134 @@ namespace StabSharp
             }
         }
 
+        private void buttonMoveToSave_Click(object sender, EventArgs e)
+        {
+            // Copy the selected image to the save folder
+            if (listView1.SelectedItems.Count == 1)
+            {
+                int index = generatedImages.Count - 1 - listView1.SelectedIndices[0];
+                string sourceFile = generatedImages[index].ImagePath;
+                SaveSystem.SaveCopyOfFileToSaveFolder(sourceFile);
+            }
+        }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            //Create a new InputForm
+            InputForm inputForm = new InputForm(this);
+            inputForm.Show();
+        }
+        private void buttonDecimateImage_Click(object sender, EventArgs e)
+        {
+            //Create a new DecimateForm
+            DecimateForm decimateForm = new DecimateForm();
+            decimateForm.Show();
+        }
+        private void buttonNewPonyInputform_Click(object sender, EventArgs e)
+        {
+            //Create a new InputForm
+            InputForm inputForm = new InputForm(this);
+            ObservableCollection<PromptPart> promptParts = new ObservableCollection<PromptPart>
+            {
+                new PromptPart("Score_9", 1f, 0, false),
+                new PromptPart("Score_8_up", 1f, 0, false),
+                new PromptPart("Score_7_up", 1f, 0, false),
+                new PromptPart("StylesForPonyDiffusion", 1f, 0, true)
+            };
+            inputForm.Show();
+            inputForm.SetupForm(promptParts, "score_6, score_5, score_4, pony, black and white, muscular, censored, furry, 3d,simple background");
+        }
+        private void buttonLoadLastInputForm_Click(object sender, EventArgs e)
+        {
+            InputSave? inputSave = SaveSystem.LoadLastPrompt();
+            if (!inputSave.HasValue)
+            {
+                return;
+            }
+            InputForm inputForm = new InputForm(this);
+            inputForm.Show();
+            inputForm.SetupForm(inputSave.Value.PromptParts, inputSave.Value.NegativePrompt);
+        }
+
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listView1.SelectedItems.Count == 1)
+            {
+                int index = generatedImages.Count - 1 - listView1.SelectedIndices[0];
+
+                pictureBox1.Image = Image.FromFile(generatedImages[index].ImagePath);
+            }
+
+        }
+        private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (listView1.SelectedItems.Count == 1)
+            {
+                SDImage sdi = generatedImages[generatedImages.Count - 1 - listView1.SelectedIndices[0]];
+                //TODO: Fix the 
+                AddTextToImageRequestToQueue(sdi.Parameters.prompt, sdi.Parameters.negative_prompt, true, sdi.Parameters.Seed, (int)sdi.Parameters.steps, (string)sdi.Parameters.sampler_name, false, sdi.Parameters.clip_skip);
+                MessageBox.Show("Fix Clip Skip for HighRes");
+            }
+        }
+
+        private void listView1_MouseClick(object sender, MouseEventArgs e)
+        {
+            //checkBoxShowNewest.Checked = true;
+        }
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start("https://stable-diffusion-art.com/prompt-guide/");
+        }
+        private void linkLabelLoras_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start("explorer.exe", "E:\\stable-diffusion-webui\\models\\Lora\\");
+        }
+        private void linkLabelDownloads_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start("shell:Downloads");
+        }
+        private void linkLabelModels_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start("explorer.exe", "E:\\stable-diffusion-webui\\models\\Stable-diffusion");
+        }
+
+
+        private void UpdatePictureBoxWithImage(string imagePath)
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(new Action(() => UpdatePictureBoxWithImage(imagePath)));
+                return;
+            }
+
+            using (Image newImage = Image.FromFile(imagePath))
+            {
+                if (pictureBox1.Image != null)
+                {
+                    var oldImage = pictureBox1.Image;
+                    pictureBox1.Image = new Bitmap(newImage);
+                    oldImage.Dispose(); // Dispose the old image to free memory
+                }
+                else
+                {
+                    pictureBox1.Image = new Bitmap(newImage);
+                }
+            }
+        }
+
+        private async void updateProgress()
+        {
+            if (isUdatingProgress)
+            {
+                var progress = await sdapi.GetProgress();
+                progressBarCurrentRequest.Value = progress;
+                await Task.Delay(500);
+                updateProgress();
+            }
+            else
+            {
+                progressBarCurrentRequest.Value = 0;
+            }
+        }
         private async void popFromQueue()
         {
             // Check if the API is ready to process a new request (currently just set by this program, not by the API)
@@ -154,23 +266,10 @@ namespace StabSharp
                 {
                     generatedImages.Add(generatedImage);
 
-                    // Update the existing PictureBox with the new image.
-                    this.Invoke(new Action(() =>
+                    if (checkBoxShowNewest.Checked)
                     {
-                        using (Image newImage = Image.FromFile(generatedImage.ImagePath))
-                        {
-                            if (pictureBox1.Image != null)
-                            {
-                                var oldImage = pictureBox1.Image;
-                                pictureBox1.Image = new Bitmap(newImage);
-                                oldImage.Dispose(); // Dispose the old image to free memory
-                            }
-                            else
-                            {
-                                pictureBox1.Image = new Bitmap(newImage);
-                            }
-                        }
-                    }));
+                        UpdatePictureBoxWithImage(generatedImage.ImagePath);
+                    }
 
                     populateImageListView();
                     stableDiffusionAPIReady = true;
@@ -192,105 +291,6 @@ namespace StabSharp
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            //Create a new InputForm
-            InputForm inputForm = new InputForm(this);
-            inputForm.Show();
-        }
-        private void buttonNewPonyInputform_Click(object sender, EventArgs e)
-        {
-            //Create a new InputForm
-            InputForm inputForm = new InputForm(this);
-            ObservableCollection<PromptPart> promptParts = new ObservableCollection<PromptPart>
-            {
-                new PromptPart("Score_9", 1f, 0, false),
-                new PromptPart("Score_8_up", 1f, 0, false),
-                new PromptPart("Score_7_up", 1f, 0, false),
-                new PromptPart("StylesForPonyDiffusion", 1f, 0, true)
-            };
-            inputForm.Show();
-            inputForm.SetupForm(promptParts, "score_6, score_5, score_4, pony, black and white, muscular, censored, furry, 3d,simple background");
-        }
 
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (listView1.SelectedItems.Count == 1)
-            {
-                int index = generatedImages.Count - 1 - listView1.SelectedIndices[0];
-
-                pictureBox1.Image = Image.FromFile(generatedImages[index].ImagePath);
-            }
-
-        }
-
-        private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (listView1.SelectedItems.Count == 1)
-            {
-                SDImage sdi = generatedImages[generatedImages.Count - 1 - listView1.SelectedIndices[0]];
-                //TODO: Fix the 
-                AddTextToImageRequestToQueue(sdi.Parameters.prompt, sdi.Parameters.negative_prompt, true, sdi.Parameters.Seed,(int)sdi.Parameters.steps,(string)sdi.Parameters.sampler_name, false, sdi.Parameters.clip_skip);
-                MessageBox.Show("Fix Clip Skip for HighRes");
-            }
-        }
-
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            Process.Start("https://stable-diffusion-art.com/prompt-guide/");
-        }
-
-        private void linkLabelLoras_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            Process.Start("explorer.exe", "D:\\stable-diffusion-webui\\models\\Lora\\");
-        }
-
-        private void linkLabelDownloads_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            Process.Start("shell:Downloads");
-        }
-
-        private void linkLabelModels_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            Process.Start("explorer.exe", "D:\\stable-diffusion-webui\\models\\Stable-diffusion");
-        }
-
-        private void buttonMoveToSave_Click(object sender, EventArgs e)
-        {
-            // Copy the selected image to the save folder
-            if (listView1.SelectedItems.Count == 1)
-            {
-                int index = generatedImages.Count - 1 - listView1.SelectedIndices[0];
-                string sourceFile = generatedImages[index].ImagePath;
-                SaveSystem.SaveCopyOfFileToSaveFolder(sourceFile);
-            }
-        }
-
-        private async void updateProgress()
-        {
-            if (isUdatingProgress)
-            {
-                var progress = await sdapi.GetProgress();
-                progressBarCurrentRequest.Value = progress;
-                await Task.Delay(500);
-                updateProgress();
-            }
-            else
-            {
-                progressBarCurrentRequest.Value = 0;
-            }
-        }
-
-        private void listView1_MouseClick(object sender, MouseEventArgs e)
-        {
-            checkBoxShowNewest.Checked = true;
-        }
-
-        private void buttonDecimateImage_Click(object sender, EventArgs e)
-        {
-            //Create a new DecimateForm
-            DecimateForm decimateForm = new DecimateForm();
-            decimateForm.Show();
-        }
     }
 }

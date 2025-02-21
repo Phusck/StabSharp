@@ -102,7 +102,7 @@ namespace StabSharp
 
         public async Task<int> GetProgress()
         {
-
+    
             using (var client = new HttpClient())
             {
                 var response = await client.GetAsync("http://127.0.0.1:7860/sdapi/v1/progress?skip_current_image=false");

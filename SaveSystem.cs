@@ -11,9 +11,10 @@ namespace StabSharp
     internal class SaveSystem
     {
 
-        private const string CATEGORIESFILE = "D:/StabSharp/categories.json";
-        private const string LORASFILE = "D:/StabSharp/loras.json";
-        private const string SAVEDIMAGESFOLDER = "D:/StabSharp/Saved/";
+        private const string CATEGORIESFILE = "E:/StabSharp/categories.json";
+        private const string LORASFILE = "E:/StabSharp/loras.json";
+        private const string SAVEDIMAGESFOLDER = "E:/StabSharp/Saved/";
+        private const string LASTPROMPTSETUPFILE = "E:/StabSharp/LastPromptFile.json";
         private string[] stringsToIgnorre = { "New Category", "New Prompt Part", "New Lora Part", "New Lora Part" };
 
 
@@ -26,6 +27,17 @@ namespace StabSharp
         {
             string json = JsonConvert.SerializeObject(loras, Formatting.Indented);
             File.WriteAllText(LORASFILE, json);
+        }
+        public static void SaveLastPromptSetup(InputForm inputForm)
+        {
+            InputSave inputSave = new InputSave()
+            {
+                PromptParts = inputForm.PromptParts,
+                NegativePrompt = inputForm.NegativePrompt
+            };
+            string json = JsonConvert.SerializeObject(inputSave,Formatting.Indented);
+            File.WriteAllText(LASTPROMPTSETUPFILE, json);
+
         }
 
         //A safe way of Saving, So no data is lost, can only add to the file
@@ -124,8 +136,10 @@ namespace StabSharp
                 };
                 var categories = JsonConvert.DeserializeObject<ObservableCollection<PromptPartCategory>>(json, settings);
 
-                if (categories == null) return new ObservableCollection<PromptPartCategory>(); // Ensure we never return null
-
+                if (categories == null)
+                {
+                    return new ObservableCollection<PromptPartCategory>(); // Ensure we never return null
+                }
                 return categories;
             }
             else
@@ -157,6 +171,16 @@ namespace StabSharp
             {
                 return new ObservableCollection<Lora>();
             }
+        }
+        public static InputSave? LoadLastPrompt()
+        {
+            if (!File.Exists(LASTPROMPTSETUPFILE))
+            {
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<InputSave>(File.ReadAllText(LASTPROMPTSETUPFILE));
+             
         }
 
         public static void SaveCopyOfFileToSaveFolder(string fromPath)

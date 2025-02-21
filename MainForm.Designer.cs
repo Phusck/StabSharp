@@ -45,15 +45,16 @@
             this.button1 = new System.Windows.Forms.Button();
             this.checkBoxShowNewest = new System.Windows.Forms.CheckBox();
             this.buttonDecimateImage = new System.Windows.Forms.Button();
+            this.buttonLoadLastInputForm = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonNewInputForm
             // 
-            this.buttonNewInputForm.Location = new System.Drawing.Point(362, 37);
-            this.buttonNewInputForm.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.buttonNewInputForm.Location = new System.Drawing.Point(272, 30);
+            this.buttonNewInputForm.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.buttonNewInputForm.Name = "buttonNewInputForm";
-            this.buttonNewInputForm.Size = new System.Drawing.Size(136, 55);
+            this.buttonNewInputForm.Size = new System.Drawing.Size(102, 45);
             this.buttonNewInputForm.TabIndex = 1;
             this.buttonNewInputForm.Text = "New Input form";
             this.buttonNewInputForm.UseVisualStyleBackColor = true;
@@ -61,8 +62,8 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(362, 96);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.pictureBox1.Location = new System.Drawing.Point(272, 78);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(1024, 1024);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -72,10 +73,10 @@
             // listView1
             // 
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(11, 10);
-            this.listView1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.listView1.Location = new System.Drawing.Point(8, 8);
+            this.listView1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(345, 621);
+            this.listView1.Size = new System.Drawing.Size(260, 505);
             this.listView1.TabIndex = 3;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
@@ -85,9 +86,10 @@
             // linkLabel1
             // 
             this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(1209, 29);
+            this.linkLabel1.Location = new System.Drawing.Point(907, 24);
+            this.linkLabel1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(252, 16);
+            this.linkLabel1.Size = new System.Drawing.Size(202, 13);
             this.linkLabel1.TabIndex = 4;
             this.linkLabel1.TabStop = true;
             this.linkLabel1.Text = "Stable Diffusion prompt: a definitive guide";
@@ -96,9 +98,10 @@
             // linkLabelLoras
             // 
             this.linkLabelLoras.AutoSize = true;
-            this.linkLabelLoras.Location = new System.Drawing.Point(1332, 138);
+            this.linkLabelLoras.Location = new System.Drawing.Point(999, 112);
+            this.linkLabelLoras.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.linkLabelLoras.Name = "linkLabelLoras";
-            this.linkLabelLoras.Size = new System.Drawing.Size(86, 16);
+            this.linkLabelLoras.Size = new System.Drawing.Size(68, 13);
             this.linkLabelLoras.TabIndex = 5;
             this.linkLabelLoras.TabStop = true;
             this.linkLabelLoras.Text = "Folder: Loras";
@@ -107,9 +110,10 @@
             // linkLabelDownloads
             // 
             this.linkLabelDownloads.AutoSize = true;
-            this.linkLabelDownloads.Location = new System.Drawing.Point(1332, 87);
+            this.linkLabelDownloads.Location = new System.Drawing.Point(999, 71);
+            this.linkLabelDownloads.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.linkLabelDownloads.Name = "linkLabelDownloads";
-            this.linkLabelDownloads.Size = new System.Drawing.Size(120, 16);
+            this.linkLabelDownloads.Size = new System.Drawing.Size(95, 13);
             this.linkLabelDownloads.TabIndex = 6;
             this.linkLabelDownloads.TabStop = true;
             this.linkLabelDownloads.Text = "Folder: Downloads";
@@ -118,9 +122,10 @@
             // linkLabelModels
             // 
             this.linkLabelModels.AutoSize = true;
-            this.linkLabelModels.Location = new System.Drawing.Point(1332, 114);
+            this.linkLabelModels.Location = new System.Drawing.Point(999, 93);
+            this.linkLabelModels.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.linkLabelModels.Name = "linkLabelModels";
-            this.linkLabelModels.Size = new System.Drawing.Size(97, 16);
+            this.linkLabelModels.Size = new System.Drawing.Size(76, 13);
             this.linkLabelModels.TabIndex = 7;
             this.linkLabelModels.TabStop = true;
             this.linkLabelModels.Text = "Folder: Models";
@@ -129,19 +134,18 @@
             // listboxRequests
             // 
             this.listboxRequests.FormattingEnabled = true;
-            this.listboxRequests.ItemHeight = 16;
-            this.listboxRequests.Location = new System.Drawing.Point(1316, 294);
-            this.listboxRequests.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.listboxRequests.Location = new System.Drawing.Point(987, 239);
+            this.listboxRequests.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.listboxRequests.Name = "listboxRequests";
-            this.listboxRequests.Size = new System.Drawing.Size(219, 100);
+            this.listboxRequests.Size = new System.Drawing.Size(165, 82);
             this.listboxRequests.TabIndex = 8;
             // 
             // buttonMoveToSave
             // 
-            this.buttonMoveToSave.Location = new System.Drawing.Point(1335, 398);
-            this.buttonMoveToSave.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.buttonMoveToSave.Location = new System.Drawing.Point(1001, 323);
+            this.buttonMoveToSave.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.buttonMoveToSave.Name = "buttonMoveToSave";
-            this.buttonMoveToSave.Size = new System.Drawing.Size(136, 55);
+            this.buttonMoveToSave.Size = new System.Drawing.Size(102, 45);
             this.buttonMoveToSave.TabIndex = 9;
             this.buttonMoveToSave.Text = "Save";
             this.buttonMoveToSave.UseVisualStyleBackColor = true;
@@ -149,10 +153,10 @@
             // 
             // buttonNewPonyInputform
             // 
-            this.buttonNewPonyInputform.Location = new System.Drawing.Point(504, 37);
-            this.buttonNewPonyInputform.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.buttonNewPonyInputform.Location = new System.Drawing.Point(378, 30);
+            this.buttonNewPonyInputform.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.buttonNewPonyInputform.Name = "buttonNewPonyInputform";
-            this.buttonNewPonyInputform.Size = new System.Drawing.Size(136, 55);
+            this.buttonNewPonyInputform.Size = new System.Drawing.Size(102, 45);
             this.buttonNewPonyInputform.TabIndex = 10;
             this.buttonNewPonyInputform.Text = "New Pony Input form";
             this.buttonNewPonyInputform.UseVisualStyleBackColor = true;
@@ -160,44 +164,46 @@
             // 
             // textBoxCurrentRequest
             // 
-            this.textBoxCurrentRequest.Location = new System.Drawing.Point(1316, 229);
-            this.textBoxCurrentRequest.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.textBoxCurrentRequest.Location = new System.Drawing.Point(987, 186);
+            this.textBoxCurrentRequest.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.textBoxCurrentRequest.Name = "textBoxCurrentRequest";
-            this.textBoxCurrentRequest.Size = new System.Drawing.Size(219, 22);
+            this.textBoxCurrentRequest.Size = new System.Drawing.Size(165, 20);
             this.textBoxCurrentRequest.TabIndex = 11;
             // 
             // labelCurrentTask
             // 
             this.labelCurrentTask.AutoSize = true;
-            this.labelCurrentTask.Location = new System.Drawing.Point(1312, 210);
+            this.labelCurrentTask.Location = new System.Drawing.Point(984, 171);
+            this.labelCurrentTask.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelCurrentTask.Name = "labelCurrentTask";
-            this.labelCurrentTask.Size = new System.Drawing.Size(103, 16);
+            this.labelCurrentTask.Size = new System.Drawing.Size(84, 13);
             this.labelCurrentTask.TabIndex = 12;
             this.labelCurrentTask.Text = "Current Request";
             // 
             // labelTaskQueue
             // 
             this.labelTaskQueue.AutoSize = true;
-            this.labelTaskQueue.Location = new System.Drawing.Point(1312, 275);
+            this.labelTaskQueue.Location = new System.Drawing.Point(984, 223);
+            this.labelTaskQueue.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelTaskQueue.Name = "labelTaskQueue";
-            this.labelTaskQueue.Size = new System.Drawing.Size(92, 16);
+            this.labelTaskQueue.Size = new System.Drawing.Size(74, 13);
             this.labelTaskQueue.TabIndex = 13;
             this.labelTaskQueue.Text = "Task Request";
             // 
             // progressBarCurrentRequest
             // 
-            this.progressBarCurrentRequest.Location = new System.Drawing.Point(1316, 254);
-            this.progressBarCurrentRequest.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.progressBarCurrentRequest.Location = new System.Drawing.Point(987, 206);
+            this.progressBarCurrentRequest.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.progressBarCurrentRequest.Name = "progressBarCurrentRequest";
-            this.progressBarCurrentRequest.Size = new System.Drawing.Size(219, 18);
+            this.progressBarCurrentRequest.Size = new System.Drawing.Size(164, 15);
             this.progressBarCurrentRequest.TabIndex = 14;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(1413, 485);
-            this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button1.Location = new System.Drawing.Point(1060, 394);
+            this.button1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(136, 55);
+            this.button1.Size = new System.Drawing.Size(102, 45);
             this.button1.TabIndex = 15;
             this.button1.Text = "Save";
             this.button1.UseVisualStyleBackColor = true;
@@ -207,29 +213,42 @@
             this.checkBoxShowNewest.AutoSize = true;
             this.checkBoxShowNewest.Checked = true;
             this.checkBoxShowNewest.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxShowNewest.Location = new System.Drawing.Point(362, 12);
+            this.checkBoxShowNewest.Location = new System.Drawing.Point(272, 10);
+            this.checkBoxShowNewest.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.checkBoxShowNewest.Name = "checkBoxShowNewest";
-            this.checkBoxShowNewest.Size = new System.Drawing.Size(110, 20);
+            this.checkBoxShowNewest.Size = new System.Drawing.Size(92, 17);
             this.checkBoxShowNewest.TabIndex = 16;
             this.checkBoxShowNewest.Text = "Show Newest";
             this.checkBoxShowNewest.UseVisualStyleBackColor = true;
             // 
             // buttonDecimateImage
             // 
-            this.buttonDecimateImage.Location = new System.Drawing.Point(12, 635);
-            this.buttonDecimateImage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.buttonDecimateImage.Location = new System.Drawing.Point(9, 516);
+            this.buttonDecimateImage.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.buttonDecimateImage.Name = "buttonDecimateImage";
-            this.buttonDecimateImage.Size = new System.Drawing.Size(136, 55);
+            this.buttonDecimateImage.Size = new System.Drawing.Size(102, 45);
             this.buttonDecimateImage.TabIndex = 17;
             this.buttonDecimateImage.Text = "Decimate Window";
             this.buttonDecimateImage.UseVisualStyleBackColor = true;
             this.buttonDecimateImage.Click += new System.EventHandler(this.buttonDecimateImage_Click);
             // 
+            // buttonLoadLastInputForm
+            // 
+            this.buttonLoadLastInputForm.Location = new System.Drawing.Point(484, 29);
+            this.buttonLoadLastInputForm.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonLoadLastInputForm.Name = "buttonLoadLastInputForm";
+            this.buttonLoadLastInputForm.Size = new System.Drawing.Size(102, 45);
+            this.buttonLoadLastInputForm.TabIndex = 18;
+            this.buttonLoadLastInputForm.Text = "Load last Input form";
+            this.buttonLoadLastInputForm.UseVisualStyleBackColor = true;
+            this.buttonLoadLastInputForm.Click += new System.EventHandler(this.buttonLoadLastInputForm_Click);
+            // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1545, 931);
+            this.ClientSize = new System.Drawing.Size(1159, 756);
+            this.Controls.Add(this.buttonLoadLastInputForm);
             this.Controls.Add(this.buttonDecimateImage);
             this.Controls.Add(this.checkBoxShowNewest);
             this.Controls.Add(this.button1);
@@ -247,7 +266,7 @@
             this.Controls.Add(this.listView1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.buttonNewInputForm);
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "MainForm";
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -274,6 +293,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.CheckBox checkBoxShowNewest;
         private System.Windows.Forms.Button buttonDecimateImage;
+        private System.Windows.Forms.Button buttonLoadLastInputForm;
     }
 }
 

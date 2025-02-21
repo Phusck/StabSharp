@@ -4,23 +4,21 @@ using System.Text;
 
 namespace StabSharp
 {
-    public class PromptPart : ICloneable
+    [Serializable]
+    public struct PromptPart : ICloneable
     {
         public string Text;
         public float Weight;
         public int QuantityOfParantheses;
-        public bool IsLora = false;
+        public bool IsLora;
 
-
-        public PromptPart()
-        {
-        }
 
         public PromptPart(string text)
         {
             Text = text;
             Weight = 1f;
             QuantityOfParantheses = 0;
+            IsLora = false;
         }
 
         public PromptPart(string text, float weight, int quantityOfCurlyBrackets, bool isLora)
