@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -13,6 +14,7 @@ namespace StabSharp
 
         private const string CATEGORIESFILE = "E:/StabSharp/categories.json";
         private const string LORASFILE = "E:/StabSharp/loras.json";
+        private const string LORACATEGORIESFILE = "E:/StabSharp/loraCategories.json";
         private const string SAVEDIMAGESFOLDER = "E:/StabSharp/Saved/";
         private const string LASTPROMPTSETUPFILE = "E:/StabSharp/LastPromptFile.json";
         private string[] stringsToIgnorre = { "New Category", "New Prompt Part", "New Lora Part", "New Lora Part" };
@@ -27,6 +29,11 @@ namespace StabSharp
         {
             string json = JsonConvert.SerializeObject(loras, Formatting.Indented);
             File.WriteAllText(LORASFILE, json);
+        }
+        public static void SaveLoraCategoriesToJson(ObservableCollection<LoraCategory> loraCategories)
+        {
+            string json = JsonConvert.SerializeObject(loraCategories, Formatting.Indented);
+            File.WriteAllText(LORACATEGORIESFILE, json);
         }
         public static void SaveLastPromptSetup(InputForm inputForm)
         {
@@ -121,6 +128,67 @@ namespace StabSharp
             //then we save the merged data
             SaveLorasToJson(currentLoras);
         }
+        public static void SafeSaveLoraCategoriesToJson(ObservableCollection<LoraCategory> loraCategories)
+        {
+            // First load the current data
+            var currentCategories = LoadLoraCategoriesFromJson();
+
+            // Merge incoming categories into current
+            foreach (var newCategory in loraCategories)
+            {
+                bool foundCategory = false;
+                foreach (var currentCategory in currentCategories)
+                {
+                    if (newCategory.LoraCategoryName == currentCategory.LoraCategoryName)
+                    {
+                        foundCategory = true;
+                        if (newCategory.Loras == null)
+                        {
+                            continue;
+                        }
+
+                        // Merge each Lora in this category
+                        foreach (var newLora in newCategory.Loras)
+                        {
+                            if (currentCategory.Loras == null)
+                            {
+                                continue; // Skip the ignored Lora names
+                            }
+
+                            bool foundLora = false;
+                            foreach (var currentLora in currentCategory.Loras)
+                            {
+                                if (newLora.LoraName == currentLora.LoraName)
+                                {
+                                    foundLora = true;
+                                    // Merge parts within this Lora
+                                    foreach (var newPart in newLora.Parts)
+                                    {
+                                        if (!currentLora.Parts.Any(p => p.Text == newPart.Text))
+                                        {
+                                            currentLora.Parts.Add(newPart);
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                            if (!foundLora)
+                            {
+                                currentCategory.Loras.Add(newLora);
+                            }
+                        }
+                        break;
+                    }
+                }
+                if (!foundCategory)
+                {
+                    currentCategories.Add(newCategory);
+                }
+            }
+
+            // Save the merged data
+            SaveLoraCategoriesToJson(currentCategories);
+        }
 
         public static ObservableCollection<PromptPartCategory> LoadCategoriesFromJson()
         {
@@ -172,6 +240,32 @@ namespace StabSharp
                 return new ObservableCollection<Lora>();
             }
         }
+        internal static ObservableCollection<LoraCategory> LoadLoraCategoriesFromJson()
+        {
+
+            if (File.Exists(LORACATEGORIESFILE))
+            {
+                string json = File.ReadAllText(LORACATEGORIESFILE);
+                // Adjust deserialization settings if needed, for example to handle missing members, etc.
+                var settings = new JsonSerializerSettings
+                {
+                    // If your JSON might contain additional data that's not represented in your classes, you might want to ignore those:
+                    MissingMemberHandling = MissingMemberHandling.Ignore
+                };
+                var loraCategories = JsonConvert.DeserializeObject<ObservableCollection<LoraCategory>>(json, settings);
+                if (loraCategories == null)
+                {
+                    return new ObservableCollection<LoraCategory>();
+                }
+                ; // Ensure we never return null
+                return loraCategories;
+            }
+            else
+            {
+                return new ObservableCollection<LoraCategory>();
+            }
+        }
+
         public static InputSave? LoadLastPrompt()
         {
             if (!File.Exists(LASTPROMPTSETUPFILE))
@@ -200,6 +294,8 @@ namespace StabSharp
             }
             File.Copy(fromPath, SAVEDIMAGESFOLDER + iString +".png");
         }
+
+
     }
 
 

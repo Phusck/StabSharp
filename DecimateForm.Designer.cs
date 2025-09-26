@@ -29,36 +29,51 @@
         private void InitializeComponent()
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBoxRaw = new System.Windows.Forms.TextBox();
+            this.textBoxFormatted = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.pictureBox1.Location = new System.Drawing.Point(12, 12);
+            this.pictureBox1.Location = new System.Drawing.Point(9, 10);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(616, 446);
+            this.pictureBox1.Size = new System.Drawing.Size(462, 362);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.DragDrop += new System.Windows.Forms.DragEventHandler(this.pictureBox1_DragDrop);
             this.pictureBox1.DragEnter += new System.Windows.Forms.DragEventHandler(this.pictureBox1_DragEnter);
             // 
-            // textBox1
+            // textBoxRaw
             // 
-            this.textBox1.Location = new System.Drawing.Point(698, 119);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(228, 349);
-            this.textBox1.TabIndex = 1;
+            this.textBoxRaw.Location = new System.Drawing.Point(486, 11);
+            this.textBoxRaw.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxRaw.Multiline = true;
+            this.textBoxRaw.Name = "textBoxRaw";
+            this.textBoxRaw.Size = new System.Drawing.Size(1093, 284);
+            this.textBoxRaw.TabIndex = 1;
+            // 
+            // textBoxFormatted
+            // 
+            this.textBoxFormatted.Location = new System.Drawing.Point(486, 309);
+            this.textBoxFormatted.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxFormatted.Multiline = true;
+            this.textBoxFormatted.Name = "textBoxFormatted";
+            this.textBoxFormatted.Size = new System.Drawing.Size(1093, 284);
+            this.textBoxFormatted.TabIndex = 2;
             // 
             // DecimateForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1489, 764);
-            this.Controls.Add(this.textBox1);
+            this.ClientSize = new System.Drawing.Size(1827, 862);
+            this.Controls.Add(this.textBoxFormatted);
+            this.Controls.Add(this.textBoxRaw);
             this.Controls.Add(this.pictureBox1);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "DecimateForm";
             this.Text = "DecimateWindow";
             this.Load += new System.EventHandler(this.DecimateForm_Load);
@@ -71,6 +86,7 @@
         #endregion
 
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox textBoxRaw;
+        private System.Windows.Forms.TextBox textBoxFormatted;
     }
 }

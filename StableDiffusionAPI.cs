@@ -16,62 +16,18 @@ namespace StabSharp
     {
         const string myPersistentDataPath = "C:/TempTemp";
 
-        public string RequestTxtToImg(string prompt, string negativePrompt, bool doHires, int seed, int steps, string sampler, bool doClipSkip, int clipSkipNumber)
-        {
-            return MakeRequest(prompt, negativePrompt, doHires, seed,steps, sampler,doClipSkip,clipSkipNumber);
-        }
-
-
-        private string MakeRequest(string prompt, string negativePrompt, bool doHires, int seed, int steps, string sampler, bool doClipSkip, int clipSkipNumber)
+        public async Task<SDImage> ImageRequest(Prompt prompt)
         {
 
 
-            Random random = new Random();
-
-
-            Dictionary<string, string> requestData = new Dictionary<string, string>
-            {
-                { "prompt", prompt },
-                { "steps", steps.ToString() },
-                { "negative_prompt", negativePrompt },
-                { "sampler_name", sampler },
-                { "sampler_index", sampler }
-            };
-            if (doClipSkip)
-            {
-                requestData.Add("clip_skip", clipSkipNumber.ToString());
-            }
-
-
-
-            
-            if (seed == -1)
-            {
-                requestData.Add("seed", random.Next().ToString());
-            }
-            else
-            {
-                requestData.Add("seed", seed.ToString());
-            }
-            if (doHires)
-            {
-                requestData.Add("enable_hr", "true");
-                requestData.Add("denoising_strength", "0.7");
-                requestData.Add("hr_scale", "1.5");
-                requestData.Add("hr_upscaler", "Latent");
-            }
-
-            return DictionaryToJson(requestData);
-        }
-
-        public async Task<SDImage> ImageRequest(string jsonReqeustString)
-        {
             if (!IsServerRunning("127.0.0.1", 7860))
             {
                 // message box
                 MessageBox.Show("Stable Diffusion API is not running,                 -    We failed inside       -   Should not happen     -   *     *     .");
                 return null;
             }
+
+            string jsonReqeustString = PromptToJson(prompt);
 
             using (var client = new HttpClient())
             {
@@ -90,7 +46,7 @@ namespace StabSharp
                     string newImageFileName = "image_" + newImageFileNumber + ".png";
                     string fullPath = Path.Combine(myPersistentDataPath, newImageFileName);
                     File.WriteAllBytes(fullPath, Convert.FromBase64String(myImageData.images[0]));
-                    return new SDImage(fullPath, myImageData.parameters);
+                    return new SDImage(fullPath, prompt);
                 }
                 else
                 {
@@ -180,18 +136,77 @@ namespace StabSharp
             return strMaxImageNumber;
         }
 
-        private string DictionaryToJson(Dictionary<string, string> dict)
+        public static string PromptToJson(Prompt prompt)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("{");
-            foreach (KeyValuePair<string, string> entry in dict)
+            // build a payload dictionary from whatever parts of Prompt are set
+            var payload = new Dictionary<string, object>
             {
-                sb.Append($"\"{entry.Key}\":\"{entry.Value}\",");
-            }
-            sb.Remove(sb.Length - 1, 1);
-            sb.Append("}");
-            return sb.ToString();
+                ["prompt"] = prompt.PromptParts != null
+                    ? string.Join(", ", prompt.PromptParts)
+                    : string.Empty,
+                ["negative_prompt"] = prompt.NegativePromptParts != null
+                    ? string.Join(", ", prompt.NegativePromptParts)
+                    : string.Empty,
+            };
 
+            if (int.TryParse(prompt.Steps, out var steps))
+            {
+                payload["steps"] = steps;
+            }
+
+            if (!string.IsNullOrWhiteSpace(prompt.Sampler))
+            {
+                payload["sampler_name"] = prompt.Sampler;
+            }
+
+            if (double.TryParse(prompt.CFGScale, out var cfg))
+            {
+                payload["cfg_scale"] = cfg;
+            }
+
+            if (int.TryParse(prompt.Seed, out var seed))
+            {
+                payload["seed"] = seed;
+            }
+
+            // example of pulling in ClipSkip if present
+            if (int.TryParse(prompt.ClipSkip, out var clipSkip))
+            {
+                payload["override_settings"] = new
+                {
+                    CLIP_stop_at_last_layers = clipSkip
+                };
+            }
+
+            // you can mirror that pattern for any of the other Prompt fields
+            // e.g. hires:
+            if (double.TryParse(prompt.DenoisingStrength, out var ds))
+            {
+                payload["denoising_strength"] = ds;
+            }
+
+            if (!string.IsNullOrWhiteSpace(prompt.HiresUpscaler))
+            {
+                payload["enable_hr"] = true;
+                if (double.TryParse(prompt.HiresUpscale, out var hrScale))
+                {
+                    payload["hr_scale"] = hrScale;
+                }
+
+                if (int.TryParse(prompt.HiresSteps, out var hrSteps))
+                {
+                    payload["hr_steps"] = hrSteps;
+                }
+
+                payload["hr_upscaler"] = prompt.HiresUpscaler;
+            }
+
+
+            //Serialize the object and add it to the users clipboard
+            string json = JsonConvert.SerializeObject(payload, Formatting.Indented);
+            Clipboard.SetText(json);
+            
+            return json;
         }
 
         public bool IsServerRunning(string server, int port)
@@ -211,56 +226,22 @@ namespace StabSharp
 
     }
 
-
-    public class Parameters
-    {
-        public bool enable_hr { get; set; }
-        public double? denoising_strength { get; set; }
-        public int? firstphase_width { get; set; }
-        public int? firstphase_height { get; set; }
-        public string prompt { get; set; }
-        public object styles { get; set; }
-        public int Seed { get; set; }
-        public int? subseed { get; set; }
-        public int? subseed_strength { get; set; }
-        public int? seed_resize_from_h { get; set; }
-        public int? seed_resize_from_w { get; set; }
-        public object sampler_name { get; set; }
-        public int? batch_size { get; set; }
-        public int? n_iter { get; set; }
-        public int? steps { get; set; }
-        public double? cfg_scale { get; set; }
-        public int? width { get; set; }
-        public int? height { get; set; }
-        public bool? restore_faces { get; set; }
-        public bool? tiling { get; set; }
-        public string negative_prompt { get; set; }
-        public object eta { get; set; }
-        public double? s_churn { get; set; }
-        public object s_tmax { get; set; }
-        public double? s_tmin { get; set; }
-        public double? s_noise { get; set; }
-        public object override_settings { get; set; }
-        public string sampler_index { get; set; }
-        public int clip_skip { get; set; }
-    }
-
     public class ImageData
     {
         public List<string> images { get; set; }
-        public Parameters parameters { get; set; }
+        public Prompt promptData{ get; set; }
         public string info { get; set; }
     }
 
     public class SDImage
     {
         public string ImagePath;
-        public Parameters Parameters;
+        public Prompt PromptData;
 
-        public SDImage(string imagePath, Parameters parameters)
+        public SDImage(string imagePath, Prompt promptData)
         {
             ImagePath = imagePath;
-            Parameters = parameters;
+            PromptData = promptData;
         }
     }
 

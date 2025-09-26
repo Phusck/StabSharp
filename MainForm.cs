@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StabSharp.CodeGeneration;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -19,8 +20,8 @@ namespace StabSharp
     {
         private StableDiffusionAPI sdapi = new StableDiffusionAPI();
         private List<SDImage> generatedImages = new List<SDImage>();
-        private List<Request> requestQueue = new List<Request>();
-        private Request currentRequest;
+        private List<Prompt> promptQueue = new List<Prompt>();
+        private Prompt? currentPrompt;
         private bool isUdatingProgress = false;
 
         //TODO: Move this to StableDiffusionAPI
@@ -63,17 +64,17 @@ namespace StabSharp
             listView1.Items.Clear();
             for (int i = generatedImages.Count - 1; i >= 0; i--)
             {
-                listView1.Items.Add(generatedImages[i].Parameters.Seed.ToString(), i);
+                listView1.Items.Add(generatedImages[i].PromptData.Seed.ToString(), i);
             }
         }
 
         private void UpdateRequestOverview()
         {
             listboxRequests.DataSource = null;
-            listboxRequests.DataSource = requestQueue;
-            if (currentRequest != null)
+            listboxRequests.DataSource = promptQueue;
+            if (currentPrompt != null)
             {
-                textBoxCurrentRequest.Text = currentRequest?.ToString();
+                textBoxCurrentRequest.Text = currentPrompt.ToString();
             }
             else
             {
@@ -81,12 +82,10 @@ namespace StabSharp
             }
         }
 
-        public void AddTextToImageRequestToQueue(string prompt, string negativePrompt, bool doHires, int seed, int steps, string sampler, bool doClipSkip, int clipSkipNumber)
+        public void AddTextToImageRequestToQueue(Prompt promptData)
         {
-            // Remove newlines and trailing whitespace from the prompt
-            prompt = prompt.Replace("\r\n", "");
-            prompt = prompt.Trim();
-            requestQueue.Add(new Request(RequestType.TextToImage, sdapi.RequestTxtToImg(prompt, negativePrompt, doHires, seed, steps, sampler, doClipSkip, clipSkipNumber)));
+
+            promptQueue.Add(promptData);
 
             if (stableDiffusionAPIReady)
             {
@@ -161,9 +160,13 @@ namespace StabSharp
             if (listView1.SelectedItems.Count == 1)
             {
                 SDImage sdi = generatedImages[generatedImages.Count - 1 - listView1.SelectedIndices[0]];
-                //TODO: Fix the 
-                AddTextToImageRequestToQueue(sdi.Parameters.prompt, sdi.Parameters.negative_prompt, true, sdi.Parameters.Seed, (int)sdi.Parameters.steps, (string)sdi.Parameters.sampler_name, false, sdi.Parameters.clip_skip);
-                MessageBox.Show("Fix Clip Skip for HighRes");
+                sdi.PromptData.EnableHR = "true";
+                sdi.PromptData.DenoisingStrength = "0.7";
+                sdi.PromptData.HiresUpscaler = "Latent";
+                sdi.PromptData.HiresScale = "1.1";
+
+
+                AddTextToImageRequestToQueue(sdi.PromptData);
             }
         }
 
@@ -235,7 +238,7 @@ namespace StabSharp
                 return;
             }
             // Check if the queue is empty
-            if (requestQueue.Count == 0)
+            if (promptQueue.Count == 0)
             {
                 return;
             }
@@ -247,45 +250,40 @@ namespace StabSharp
             }
 
             stableDiffusionAPIReady = false;
-            currentRequest = requestQueue[0];
-            requestQueue.RemoveAt(0);
+            currentPrompt = promptQueue[0];
+            promptQueue.RemoveAt(0);
             UpdateRequestOverview();
 
-            if (currentRequest.RequestType == RequestType.TextToImage)
+
+            isUdatingProgress = true;
+            updateProgress();
+            var generatedImage = await sdapi.ImageRequest(currentPrompt.Value);
+            isUdatingProgress = false;
+            if (generatedImage == null)
             {
-                isUdatingProgress = true;
-                updateProgress();
-                var generatedImage = await sdapi.ImageRequest(currentRequest.Prompt);
-                isUdatingProgress = false;
-                if (generatedImage == null)
-                {
-                    stableDiffusionAPIReady = true;
-                    return;
-                }
-                if (!string.IsNullOrEmpty(generatedImage.ImagePath))
-                {
-                    generatedImages.Add(generatedImage);
+                stableDiffusionAPIReady = true;
+                return;
+            }
+            if (!string.IsNullOrEmpty(generatedImage.ImagePath))
+            {
+                generatedImages.Add(generatedImage);
 
-                    if (checkBoxShowNewest.Checked)
-                    {
-                        UpdatePictureBoxWithImage(generatedImage.ImagePath);
-                    }
-
-                    populateImageListView();
-                    stableDiffusionAPIReady = true;
-                }
-                else
+                if (checkBoxShowNewest.Checked)
                 {
-                    MessageBox.Show("Failed to generate image.");
+                    UpdatePictureBoxWithImage(generatedImage.ImagePath);
                 }
+
+                populateImageListView();
+                stableDiffusionAPIReady = true;
             }
             else
             {
-                MessageBox.Show("Unknown request type");
+                MessageBox.Show("Failed to generate image.");
             }
 
+
             UpdateRequestOverview();
-            if (requestQueue.Count != 0)
+            if (promptQueue.Count != 0)
             {
                 popFromQueue();
             }
