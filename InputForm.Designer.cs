@@ -645,7 +645,7 @@
             // labelCurretlySelected
             // 
             this.labelCurretlySelected.AutoSize = true;
-            this.labelCurretlySelected.Location = new System.Drawing.Point(667, 62);
+            this.labelCurretlySelected.Location = new System.Drawing.Point(493, 68);
             this.labelCurretlySelected.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelCurretlySelected.Name = "labelCurretlySelected";
             this.labelCurretlySelected.Size = new System.Drawing.Size(107, 13);
@@ -655,17 +655,17 @@
             // textBoxSelectedPromptPart
             // 
             this.textBoxSelectedPromptPart.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxSelectedPromptPart.Location = new System.Drawing.Point(594, 68);
+            this.textBoxSelectedPromptPart.Location = new System.Drawing.Point(496, 83);
             this.textBoxSelectedPromptPart.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxSelectedPromptPart.Name = "textBoxSelectedPromptPart";
-            this.textBoxSelectedPromptPart.Size = new System.Drawing.Size(175, 26);
+            this.textBoxSelectedPromptPart.Size = new System.Drawing.Size(327, 26);
             this.textBoxSelectedPromptPart.TabIndex = 3;
             this.textBoxSelectedPromptPart.TextChanged += new System.EventHandler(this.textBoxSelectedPromptPart_TextChanged);
             this.textBoxSelectedPromptPart.Leave += new System.EventHandler(this.textBoxSelectedPromptPart_Leave);
             // 
             // buttonAddCustom
             // 
-            this.buttonAddCustom.Location = new System.Drawing.Point(594, 98);
+            this.buttonAddCustom.Location = new System.Drawing.Point(496, 113);
             this.buttonAddCustom.Margin = new System.Windows.Forms.Padding(2);
             this.buttonAddCustom.Name = "buttonAddCustom";
             this.buttonAddCustom.Size = new System.Drawing.Size(77, 37);
@@ -733,7 +733,7 @@
             // 
             // textBoxCFG
             // 
-            this.textBoxCFG.Location = new System.Drawing.Point(778, 344);
+            this.textBoxCFG.Location = new System.Drawing.Point(778, 337);
             this.textBoxCFG.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxCFG.Name = "textBoxCFG";
             this.textBoxCFG.ReadOnly = true;

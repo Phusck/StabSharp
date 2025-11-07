@@ -42,10 +42,11 @@
             this.labelCurrentTask = new System.Windows.Forms.Label();
             this.labelTaskQueue = new System.Windows.Forms.Label();
             this.progressBarCurrentRequest = new System.Windows.Forms.ProgressBar();
-            this.button1 = new System.Windows.Forms.Button();
             this.checkBoxShowNewest = new System.Windows.Forms.CheckBox();
             this.buttonDecimateImage = new System.Windows.Forms.Button();
             this.buttonLoadLastInputForm = new System.Windows.Forms.Button();
+            this.comboBoxCheckpoints = new System.Windows.Forms.ComboBox();
+            this.labelCheckpoint = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -142,7 +143,7 @@
             // 
             // buttonMoveToSave
             // 
-            this.buttonMoveToSave.Location = new System.Drawing.Point(1340, 319);
+            this.buttonMoveToSave.Location = new System.Drawing.Point(1389, 321);
             this.buttonMoveToSave.Margin = new System.Windows.Forms.Padding(2);
             this.buttonMoveToSave.Name = "buttonMoveToSave";
             this.buttonMoveToSave.Size = new System.Drawing.Size(102, 45);
@@ -198,16 +199,6 @@
             this.progressBarCurrentRequest.Size = new System.Drawing.Size(164, 15);
             this.progressBarCurrentRequest.TabIndex = 14;
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(1399, 390);
-            this.button1.Margin = new System.Windows.Forms.Padding(2);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(102, 45);
-            this.button1.TabIndex = 15;
-            this.button1.Text = "Save";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
             // checkBoxShowNewest
             // 
             this.checkBoxShowNewest.AutoSize = true;
@@ -243,15 +234,37 @@
             this.buttonLoadLastInputForm.UseVisualStyleBackColor = true;
             this.buttonLoadLastInputForm.Click += new System.EventHandler(this.buttonLoadLastInputForm_Click);
             // 
+            // comboBoxCheckpoints
+            // 
+            this.comboBoxCheckpoints.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxCheckpoints.FormattingEnabled = true;
+            this.comboBoxCheckpoints.Location = new System.Drawing.Point(8, 580);
+            this.comboBoxCheckpoints.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBoxCheckpoints.Name = "comboBoxCheckpoints";
+            this.comboBoxCheckpoints.Size = new System.Drawing.Size(260, 21);
+            this.comboBoxCheckpoints.TabIndex = 20;
+            this.comboBoxCheckpoints.SelectedIndexChanged += new System.EventHandler(this.comboBoxCheckpoints_SelectedIndexChanged);
+            // 
+            // labelCheckpoint
+            // 
+            this.labelCheckpoint.AutoSize = true;
+            this.labelCheckpoint.Location = new System.Drawing.Point(8, 565);
+            this.labelCheckpoint.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelCheckpoint.Name = "labelCheckpoint";
+            this.labelCheckpoint.Size = new System.Drawing.Size(64, 13);
+            this.labelCheckpoint.TabIndex = 19;
+            this.labelCheckpoint.Text = "Checkpoint:";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1567, 1160);
+            this.Controls.Add(this.comboBoxCheckpoints);
+            this.Controls.Add(this.labelCheckpoint);
             this.Controls.Add(this.buttonLoadLastInputForm);
             this.Controls.Add(this.buttonDecimateImage);
             this.Controls.Add(this.checkBoxShowNewest);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.progressBarCurrentRequest);
             this.Controls.Add(this.labelTaskQueue);
             this.Controls.Add(this.labelCurrentTask);
@@ -290,10 +303,11 @@
         private System.Windows.Forms.Label labelCurrentTask;
         private System.Windows.Forms.Label labelTaskQueue;
         private System.Windows.Forms.ProgressBar progressBarCurrentRequest;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.CheckBox checkBoxShowNewest;
         private System.Windows.Forms.Button buttonDecimateImage;
         private System.Windows.Forms.Button buttonLoadLastInputForm;
+        private System.Windows.Forms.ComboBox comboBoxCheckpoints;
+        private System.Windows.Forms.Label labelCheckpoint;
     }
 }
 

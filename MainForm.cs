@@ -23,6 +23,8 @@ namespace StabSharp
         private List<Prompt> promptQueue = new List<Prompt>();
         private Prompt? currentPrompt;
         private bool isUdatingProgress = false;
+        private List<Checkpoint> checkpoints = new List<Checkpoint>();
+        private bool isLoadingCheckpoints = false;
 
         //TODO: Move this to StableDiffusionAPI
         private bool stableDiffusionAPIReady = true;
@@ -35,6 +37,7 @@ namespace StabSharp
             listView1.Columns.Add("Image                                 ", 0);
             listView1.Columns.Add("Seed", 50);
             listView1.AutoResizeColumn(0, ColumnHeaderAutoResizeStyle.HeaderSize);
+            this.Load += MainForm_Load;
         }
 
         private ImageList GenerateImageList()
@@ -286,6 +289,112 @@ namespace StabSharp
             if (promptQueue.Count != 0)
             {
                 popFromQueue();
+            }
+        }
+
+        private async void MainForm_Load(object sender, EventArgs e)
+        {
+            await LoadCheckpointsAsync();
+        }
+
+        private async Task LoadCheckpointsAsync()
+        {
+            try
+            {
+                isLoadingCheckpoints = true;
+                checkpoints = await sdapi.GetCheckpointsAsync();
+                
+                if (InvokeRequired)
+                {
+                    this.Invoke(new Action(() => {
+                        comboBoxCheckpoints.Items.Clear();
+                        foreach (var checkpoint in checkpoints)
+                        {
+                            if (!string.IsNullOrEmpty(checkpoint.Title))
+                            {
+                                comboBoxCheckpoints.Items.Add(checkpoint.Title);
+                            }
+                            else if (!string.IsNullOrEmpty(checkpoint.ModelName))
+                            {
+                                comboBoxCheckpoints.Items.Add(checkpoint.ModelName);
+                            }
+                        }
+                        if (comboBoxCheckpoints.Items.Count > 0)
+                        {
+                            comboBoxCheckpoints.SelectedIndex = 0;
+                        }
+                    }));
+                }
+                else
+                {
+                    comboBoxCheckpoints.Items.Clear();
+                    foreach (var checkpoint in checkpoints)
+                    {
+                        if (!string.IsNullOrEmpty(checkpoint.Title))
+                        {
+                            comboBoxCheckpoints.Items.Add(checkpoint.Title);
+                        }
+                        else if (!string.IsNullOrEmpty(checkpoint.ModelName))
+                        {
+                            comboBoxCheckpoints.Items.Add(checkpoint.ModelName);
+                        }
+                    }
+                    if (comboBoxCheckpoints.Items.Count > 0)
+                    {
+                        comboBoxCheckpoints.SelectedIndex = 0;
+                    }
+                }
+                
+                if (checkpoints.Count == 0)
+                {
+                    if (InvokeRequired)
+                    {
+                        this.Invoke(new Action(() => {
+                            MessageBox.Show("No checkpoints found. Make sure the Stable Diffusion API server is running.");
+                        }));
+                    }
+                    else
+                    {
+                        MessageBox.Show("No checkpoints found. Make sure the Stable Diffusion API server is running.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (InvokeRequired)
+                {
+                    this.Invoke(new Action(() => {
+                        MessageBox.Show($"Error loading checkpoints: {ex.Message}");
+                    }));
+                }
+                else
+                {
+                    MessageBox.Show($"Error loading checkpoints: {ex.Message}");
+                }
+            }
+            finally
+            {
+                isLoadingCheckpoints = false;
+            }
+        }
+
+        private async void comboBoxCheckpoints_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Don't set checkpoint during initial load
+            if (isLoadingCheckpoints)
+            {
+                return;
+            }
+
+            if (comboBoxCheckpoints.SelectedIndex >= 0 && comboBoxCheckpoints.SelectedIndex < checkpoints.Count)
+            {
+                var selectedCheckpoint = checkpoints[comboBoxCheckpoints.SelectedIndex];
+                // Use Title as that's what the API expects for sd_model_checkpoint
+                bool success = await sdapi.SetActiveCheckpointAsync(selectedCheckpoint.Title);
+                if (!success)
+                {
+                    MessageBox.Show($"Failed to set checkpoint: {selectedCheckpoint.Title}");
+                }
             }
         }
 

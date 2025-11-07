@@ -77,6 +77,8 @@ namespace StabSharp
             comboBoxSamplingMethod.SelectedIndex = 0;
 
             this.AcceptButton = buttonGenerate;
+
+            UpdateSelectedPromptPartControls();
         }
 
         private void MouseWheelOnPromptPartsCategory(object sender, MouseEventArgs e)
@@ -348,7 +350,7 @@ namespace StabSharp
             {
                 noScrollListBoxPromptParts.SelectedIndex = selectedIndex;
             }
-
+            UpdateSelectedPromptPartControls();
         }
         private void refreshListboxCategories(bool keepIndex)
         {
@@ -844,13 +846,7 @@ namespace StabSharp
 
         private void noScrollListBoxPromptParts_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (noScrollListBoxPromptParts.SelectedIndex == -1)
-            {
-                textBoxSelectedPromptPart.Text = "";
-                return;
-            }
-
-            textBoxSelectedPromptPart.Text = promptParts[noScrollListBoxPromptParts.SelectedIndex].Text;
+            UpdateSelectedPromptPartControls();
         }
 
         private void textBoxSelectedPromptPart_Leave(object sender, EventArgs e)
@@ -861,6 +857,22 @@ namespace StabSharp
         private void InputForm_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void UpdateSelectedPromptPartControls()
+        {
+            int selectedIndex = noScrollListBoxPromptParts.SelectedIndex;
+            bool hasSelection = selectedIndex != -1;
+
+            textBoxSelectedPromptPart.Enabled = hasSelection;
+
+            if (!hasSelection)
+            {
+                textBoxSelectedPromptPart.Text = string.Empty;
+                return;
+            }
+
+            textBoxSelectedPromptPart.Text = promptParts[selectedIndex].Text;
         }
     }
 }

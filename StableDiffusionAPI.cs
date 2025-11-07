@@ -224,6 +224,71 @@ namespace StabSharp
             }
         }
 
+        public async Task<List<Checkpoint>> GetCheckpointsAsync()
+        {
+            if (!IsServerRunning("127.0.0.1", 7860))
+            {
+                return new List<Checkpoint>();
+            }
+
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    var response = await client.GetAsync("http://127.0.0.1:7860/sdapi/v1/sd-models");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string checkpointsData = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"Checkpoints API Response: {checkpointsData}");
+                        var checkpoints = JsonConvert.DeserializeObject<List<Checkpoint>>(checkpointsData);
+                        if (checkpoints != null)
+                        {
+                            Console.WriteLine($"Deserialized {checkpoints.Count} checkpoints");
+                        }
+                        return checkpoints ?? new List<Checkpoint>();
+                    }
+                    else
+                    {
+                        string errorContent = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"API Error: {response.StatusCode} - {errorContent}");
+                        return new List<Checkpoint>();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Exception in GetCheckpointsAsync: {ex.Message}");
+                    return new List<Checkpoint>();
+                }
+            }
+        }
+
+        public async Task<bool> SetActiveCheckpointAsync(string checkpointName)
+        {
+            if (!IsServerRunning("127.0.0.1", 7860))
+            {
+                return false;
+            }
+
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    var payload = new Dictionary<string, object>
+                    {
+                        ["sd_model_checkpoint"] = checkpointName
+                    };
+                    string json = JsonConvert.SerializeObject(payload);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync("http://127.0.0.1:7860/sdapi/v1/options", content);
+                    return response.IsSuccessStatusCode;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+        }
+
     }
 
     public class ImageData
@@ -243,6 +308,24 @@ namespace StabSharp
             ImagePath = imagePath;
             PromptData = promptData;
         }
+    }
+
+    public struct Checkpoint
+    {
+        [JsonProperty("title")]
+        public string Title { get; set; }
+
+        [JsonProperty("model_name")]
+        public string ModelName { get; set; }
+
+        [JsonProperty("hash")]
+        public string Hash { get; set; }
+
+        [JsonProperty("filename")]
+        public string Filename { get; set; }
+
+        [JsonProperty("config")]
+        public string Config { get; set; }
     }
 
 }
