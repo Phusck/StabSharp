@@ -45,6 +45,7 @@
             this.checkBoxShowNewest = new System.Windows.Forms.CheckBox();
             this.buttonDecimateImage = new System.Windows.Forms.Button();
             this.buttonLoadLastInputForm = new System.Windows.Forms.Button();
+            this.buttonClearQueue = new System.Windows.Forms.Button();
             this.comboBoxCheckpoints = new System.Windows.Forms.ComboBox();
             this.labelCheckpoint = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -234,6 +235,17 @@
             this.buttonLoadLastInputForm.UseVisualStyleBackColor = true;
             this.buttonLoadLastInputForm.Click += new System.EventHandler(this.buttonLoadLastInputForm_Click);
             // 
+            // buttonClearQueue
+            // 
+            this.buttonClearQueue.Location = new System.Drawing.Point(1326, 321);
+            this.buttonClearQueue.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonClearQueue.Name = "buttonClearQueue";
+            this.buttonClearQueue.Size = new System.Drawing.Size(58, 23);
+            this.buttonClearQueue.TabIndex = 21;
+            this.buttonClearQueue.Text = "Clear";
+            this.buttonClearQueue.UseVisualStyleBackColor = true;
+            this.buttonClearQueue.Click += new System.EventHandler(this.buttonClearQueue_Click);
+            // 
             // comboBoxCheckpoints
             // 
             this.comboBoxCheckpoints.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -263,6 +275,7 @@
             this.Controls.Add(this.comboBoxCheckpoints);
             this.Controls.Add(this.labelCheckpoint);
             this.Controls.Add(this.buttonLoadLastInputForm);
+            this.Controls.Add(this.buttonClearQueue);
             this.Controls.Add(this.buttonDecimateImage);
             this.Controls.Add(this.checkBoxShowNewest);
             this.Controls.Add(this.progressBarCurrentRequest);
@@ -306,6 +319,7 @@
         private System.Windows.Forms.CheckBox checkBoxShowNewest;
         private System.Windows.Forms.Button buttonDecimateImage;
         private System.Windows.Forms.Button buttonLoadLastInputForm;
+        private System.Windows.Forms.Button buttonClearQueue;
         private System.Windows.Forms.ComboBox comboBoxCheckpoints;
         private System.Windows.Forms.Label labelCheckpoint;
     }

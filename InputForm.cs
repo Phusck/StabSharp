@@ -77,6 +77,8 @@ namespace StabSharp
             comboBoxSamplingMethod.SelectedIndex = 0;
 
             this.AcceptButton = buttonGenerate;
+            this.KeyPreview = true;
+            this.KeyDown += InputForm_KeyDown;
 
             UpdateSelectedPromptPartControls();
         }
@@ -857,6 +859,16 @@ namespace StabSharp
         private void InputForm_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void InputForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.E)
+            {
+                e.SuppressKeyPress = true;
+                e.Handled = true;
+                buttonAddCustom.PerformClick();
+            }
         }
 
         private void UpdateSelectedPromptPartControls()

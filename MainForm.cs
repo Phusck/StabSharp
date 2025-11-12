@@ -148,6 +148,17 @@ namespace StabSharp
             inputForm.SetupForm(inputSave.Value.PromptParts, inputSave.Value.NegativePrompt);
         }
 
+        private void buttonClearQueue_Click(object sender, EventArgs e)
+        {
+            if (promptQueue.Count == 0)
+            {
+                return;
+            }
+
+            promptQueue.Clear();
+            UpdateRequestOverview();
+        }
+
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (listView1.SelectedItems.Count == 1)
