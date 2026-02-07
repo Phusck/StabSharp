@@ -19,6 +19,13 @@ namespace StabSharp
         private const string LASTPROMPTSETUPFILE = "E:/StabSharp/LastPromptFile.json";
         private string[] stringsToIgnorre = { "New Category", "New Prompt Part", "New Lora Part", "New Lora Part" };
 
+        // Legacy shape for backward compatibility with older LastPromptFile.json.
+        private sealed class LegacyInputSave
+        {
+            public ObservableCollection<PromptPart> PromptParts { get; set; }
+            public string NegativePrompt { get; set; }
+        }
+
 
         public static void SaveCategoriesToJson(ObservableCollection<PromptPartCategory> categories)
         {
@@ -37,12 +44,13 @@ namespace StabSharp
         }
         public static void SaveLastPromptSetup(InputForm inputForm)
         {
-            InputSave inputSave = new InputSave()
+            if (inputForm == null)
             {
-                PromptParts = inputForm.PromptParts,
-                NegativePrompt = inputForm.NegativePrompt
-            };
-            string json = JsonConvert.SerializeObject(inputSave,Formatting.Indented);
+                return;
+            }
+
+            Prompt promptToSave = inputForm.BuildPromptSnapshotForSave();
+            string json = JsonConvert.SerializeObject(promptToSave, Formatting.Indented);
             File.WriteAllText(LASTPROMPTSETUPFILE, json);
 
         }
@@ -266,14 +274,53 @@ namespace StabSharp
             }
         }
 
-        public static InputSave? LoadLastPrompt()
+        public static Prompt? LoadLastPrompt()
         {
             if (!File.Exists(LASTPROMPTSETUPFILE))
             {
                 return null;
             }
 
-            return JsonConvert.DeserializeObject<InputSave>(File.ReadAllText(LASTPROMPTSETUPFILE));
+            string json = File.ReadAllText(LASTPROMPTSETUPFILE);
+
+            var settings = new JsonSerializerSettings
+            {
+                MissingMemberHandling = MissingMemberHandling.Ignore
+            };
+
+            // Preferred: new format (Prompt JSON)
+            try
+            {
+                return JsonConvert.DeserializeObject<Prompt>(json, settings);
+            }
+            catch (JsonException)
+            {
+                // Fall through to legacy format.
+            }
+
+            // Legacy: InputSave JSON (PromptParts as structured PromptPart + NegativePrompt string)
+            try
+            {
+                var legacy = JsonConvert.DeserializeObject<LegacyInputSave>(json, settings);
+                if (legacy == null)
+                {
+                    return null;
+                }
+
+                return new Prompt
+                {
+                    PromptParts = legacy.PromptParts != null
+                        ? legacy.PromptParts.Select(p => p.ToString()).ToArray()
+                        : Array.Empty<string>(),
+                    NegativePromptParts = !string.IsNullOrWhiteSpace(legacy.NegativePrompt)
+                        ? legacy.NegativePrompt.Split(',').Select(s => s.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToArray()
+                        : Array.Empty<string>()
+                };
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
              
         }
 

@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
@@ -125,6 +126,35 @@ namespace StabSharp
         {
             Generate();
             SaveSystem.SaveLastPromptSetup(this);
+        }
+
+        public Prompt BuildPromptSnapshotForSave()
+        {
+            var promptData = new Prompt();
+
+            promptData.PromptParts = promptParts != null
+                ? promptParts.Select(part => part.ToString()).ToArray()
+                : Array.Empty<string>();
+
+            promptData.NegativePromptParts = !string.IsNullOrWhiteSpace(textBoxNegativePrompt.Text)
+                ? textBoxNegativePrompt.Text.Split(',').Select(part => part.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToArray()
+                : Array.Empty<string>();
+
+            promptData.Steps = trackBarSteps.Value.ToString();
+            promptData.Sampler = samplingMethods[comboBoxSamplingMethod.SelectedIndex];
+            promptData.CFGScale = trackBarCFG.Value.ToString();
+
+            if (checkBoxClipSkip.Checked)
+            {
+                promptData.ClipSkip = decimal.ToInt32(numericUpDownClipSkip.Value).ToString();
+            }
+
+            if (checkHighRes.Checked)
+            {
+                promptData.EnableHR = "true";
+            }
+
+            return promptData;
         }
 
         private void Generate()
@@ -346,22 +376,38 @@ namespace StabSharp
         private void refreshListBoxPromptParts(bool keepSelectedIndex)
         {
             int selectedIndex = noScrollListBoxPromptParts.SelectedIndex;
+            int topIndex = noScrollListBoxPromptParts.TopIndex;
             noScrollListBoxPromptParts.DataSource = null;
             noScrollListBoxPromptParts.DataSource = promptParts;
             if (keepSelectedIndex)
             {
                 noScrollListBoxPromptParts.SelectedIndex = selectedIndex;
+
+                // Rebinding resets scroll position; restore it so changes don't jump to top.
+                if (noScrollListBoxPromptParts.Items.Count > 0)
+                {
+                    int maxTop = Math.Max(0, noScrollListBoxPromptParts.Items.Count - 1);
+                    noScrollListBoxPromptParts.TopIndex = Math.Min(Math.Max(0, topIndex), maxTop);
+                }
             }
             UpdateSelectedPromptPartControls();
         }
         private void refreshListboxCategories(bool keepIndex)
         {
             int selectedIndex = listBoxCategory.SelectedIndex;
+            int topIndex = listBoxCategory.TopIndex;
             listBoxCategory.DataSource = null;
             listBoxCategory.DataSource = promptPartCategories;
             if (keepIndex)
             {
                 listBoxCategory.SelectedIndex = selectedIndex;
+
+                // Preserve scroll position when rebinding.
+                if (listBoxCategory.Items.Count > 0)
+                {
+                    int maxTop = Math.Max(0, listBoxCategory.Items.Count - 1);
+                    listBoxCategory.TopIndex = Math.Min(Math.Max(0, topIndex), maxTop);
+                }
             }
         }
         private void refreshListBoxPromptsFromCategory(bool keepSelectedIndex)
@@ -563,6 +609,9 @@ namespace StabSharp
                     promptParts.Move(noScrollListBoxPromptParts.SelectedIndex, noScrollListBoxPromptParts.SelectedIndex - 1);
                     noScrollListBoxPromptParts.SelectedIndex--;
                 }
+
+                // ObservableCollection doesn't notify WinForms binding reliably; rebind to reflect reordering.
+                refreshListBoxPromptParts(true);
             }
             else
             {
@@ -574,9 +623,11 @@ namespace StabSharp
                 var selectedPromptPart = promptParts[selectedIndex]; // Retrieve by value
                 selectedPromptPart.Weight += delta;                 // Modify property
                 promptParts[selectedIndex] = selectedPromptPart;    // Reassign back
-            }
 
-            refreshListBoxPromptParts(true);
+                // Rebind so the list display updates immediately after weight changes.
+                // refreshListBoxPromptParts preserves TopIndex so it won't jump to the top.
+                refreshListBoxPromptParts(true);
+            }
         }
 
         private void textBoxPrompt_TextChanged(object sender, EventArgs e)
@@ -818,6 +869,89 @@ namespace StabSharp
             promptParts = prompts;
             refreshListBoxPromptParts(false);
             textBoxNegativePrompt.Text = negativeprompts;
+        }
+
+        public void SetupForm(Prompt saved)
+        {
+            // Prompt parts (parse back into structured PromptPart so sliders/IsLora can match)
+            var parts = saved.PromptParts ?? Array.Empty<string>();
+            promptParts = new ObservableCollection<PromptPart>(parts.Select(PromptPart.ParseFromPromptStringOrDefault));
+            refreshListBoxPromptParts(false);
+
+            // Negative prompt
+            textBoxNegativePrompt.Text = saved.NegativePromptParts != null
+                ? string.Join(", ", saved.NegativePromptParts.Select(p => p?.Trim()).Where(p => !string.IsNullOrEmpty(p)))
+                : string.Empty;
+
+            // Steps
+            if (int.TryParse(saved.Steps, NumberStyles.Integer, CultureInfo.InvariantCulture, out int steps))
+            {
+                steps = Math.Max(trackBarSteps.Minimum, Math.Min(trackBarSteps.Maximum, steps));
+                trackBarSteps.Value = steps;
+                textBoxSteps.Text = steps.ToString(CultureInfo.InvariantCulture);
+            }
+
+            // CFG
+            int cfgValue;
+            if (int.TryParse(saved.CFGScale, NumberStyles.Integer, CultureInfo.InvariantCulture, out cfgValue) ||
+                (double.TryParse(saved.CFGScale, NumberStyles.Float, CultureInfo.InvariantCulture, out double cfgDouble) &&
+                 (cfgValue = (int)Math.Round(cfgDouble)) >= 0))
+            {
+                cfgValue = Math.Max(trackBarCFG.Minimum, Math.Min(trackBarCFG.Maximum, cfgValue));
+                trackBarCFG.Value = cfgValue;
+                textBoxCFG.Text = cfgValue.ToString(CultureInfo.InvariantCulture);
+            }
+
+            // Sampler
+            if (!string.IsNullOrWhiteSpace(saved.Sampler))
+            {
+                int idx = Array.IndexOf(samplingMethods, saved.Sampler);
+                if (idx >= 0)
+                {
+                    comboBoxSamplingMethod.SelectedIndex = idx;
+                }
+            }
+
+            // Clip skip
+            if (int.TryParse(saved.ClipSkip, NumberStyles.Integer, CultureInfo.InvariantCulture, out int clipSkip))
+            {
+                checkBoxClipSkip.Checked = true;
+                decimal val = clipSkip;
+                if (val < numericUpDownClipSkip.Minimum) val = numericUpDownClipSkip.Minimum;
+                if (val > numericUpDownClipSkip.Maximum) val = numericUpDownClipSkip.Maximum;
+                numericUpDownClipSkip.Value = val;
+            }
+            else
+            {
+                checkBoxClipSkip.Checked = false;
+            }
+
+            // High res (checkbox only)
+            bool enableHr =
+                IsTrueLike(saved.EnableHR) ||
+                !string.IsNullOrWhiteSpace(saved.HiresUpscaler) ||
+                !string.IsNullOrWhiteSpace(saved.HiresUpscalerName) ||
+                !string.IsNullOrWhiteSpace(saved.HiresUpscale) ||
+                !string.IsNullOrWhiteSpace(saved.HiresScale) ||
+                !string.IsNullOrWhiteSpace(saved.HiresSteps) ||
+                !string.IsNullOrWhiteSpace(saved.DenoisingStrength);
+
+            checkHighRes.Checked = enableHr;
+        }
+
+        private static bool IsTrueLike(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            string v = value.Trim();
+            return v.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+                   v.Equals("1", StringComparison.OrdinalIgnoreCase) ||
+                   v.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+                   v.Equals("y", StringComparison.OrdinalIgnoreCase) ||
+                   v.Equals("on", StringComparison.OrdinalIgnoreCase);
         }
 
         private void trackBarSteps_Scroll(object sender, EventArgs e)

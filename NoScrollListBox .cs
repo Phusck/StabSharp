@@ -11,8 +11,17 @@ namespace StabSharp
             // Check if the message is a mouse wheel message
             if (m.Msg == WM_MOUSEWHEEL)
             {
-                base.WndProc(ref m);
-                // Do nothing to effectively ignore the mouse wheel scrolling.
+                // Eat the message so the ListBox does NOT scroll, but still raise the MouseWheel event
+                // so consumers (like InputForm) can use the wheel for custom behavior.
+                int wParam = m.WParam.ToInt32();
+                int delta = (short)((wParam >> 16) & 0xFFFF);
+
+                int lParam = m.LParam.ToInt32();
+                int screenX = (short)(lParam & 0xFFFF);
+                int screenY = (short)((lParam >> 16) & 0xFFFF);
+
+                var clientPoint = PointToClient(new System.Drawing.Point(screenX, screenY));
+                OnMouseWheel(new MouseEventArgs(MouseButtons.None, 0, clientPoint.X, clientPoint.Y, delta));
                 return;
             }
             // For all other messages, call the base method

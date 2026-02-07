@@ -70,6 +70,76 @@ namespace StabSharp
         public string HiresUpscalerName;
 
 
+        /// <summary>
+        /// Checks if high resolution is enabled for this prompt.
+        /// </summary>
+        /// <returns>True if high resolution is enabled, false otherwise.</returns>
+        private bool IsHighResEnabled()
+        {
+            if (IsTrueLike(EnableHR))
+            {
+                return true;
+            }
+
+            return !string.IsNullOrWhiteSpace(HiresUpscaler) ||
+                   !string.IsNullOrWhiteSpace(HiresUpscalerName) ||
+                   !string.IsNullOrWhiteSpace(HiresUpscale) ||
+                   !string.IsNullOrWhiteSpace(HiresScale) ||
+                   !string.IsNullOrWhiteSpace(HiresSteps);
+        }
+
+        /// <summary>
+        /// Checks if a string value is "true-like" (case-insensitive comparison).
+        /// </summary>
+        private static bool IsTrueLike(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            string v = value.Trim();
+            return v.Equals("true", System.StringComparison.OrdinalIgnoreCase) ||
+                   v.Equals("1", System.StringComparison.OrdinalIgnoreCase) ||
+                   v.Equals("yes", System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Gets the first prompt part that is not a LoRA, with high resolution status if applicable.
+        /// </summary>
+        /// <returns>The text of the first non-LoRA prompt part with HR status, or an empty string if none found.</returns>
+        public string GetFirstNonLoraPromptPart()
+        {
+            string promptPart = string.Empty;
+
+            if (PromptParts != null && PromptParts.Length > 0)
+            {
+                foreach (var part in PromptParts)
+                {
+                    if (string.IsNullOrWhiteSpace(part))
+                    {
+                        continue;
+                    }
+
+                    string trimmedPart = part.Trim();
+                    // LoRA parts start with "<lora:"
+                    if (!trimmedPart.StartsWith("<lora:", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        promptPart = trimmedPart;
+                        break;
+                    }
+                }
+            }
+
+            // Append high resolution status if enabled
+            if (!string.IsNullOrEmpty(promptPart) && IsHighResEnabled())
+            {
+                promptPart += " (High Res)";
+            }
+
+            return promptPart;
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder();

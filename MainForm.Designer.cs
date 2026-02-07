@@ -53,32 +53,37 @@
             // 
             // buttonNewInputForm
             // 
-            this.buttonNewInputForm.Location = new System.Drawing.Point(272, 30);
-            this.buttonNewInputForm.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonNewInputForm.Location = new System.Drawing.Point(280, 12);
+            this.buttonNewInputForm.Margin = new System.Windows.Forms.Padding(8, 8, 4, 8);
             this.buttonNewInputForm.Name = "buttonNewInputForm";
-            this.buttonNewInputForm.Size = new System.Drawing.Size(102, 45);
+            this.buttonNewInputForm.Size = new System.Drawing.Size(120, 35);
             this.buttonNewInputForm.TabIndex = 1;
-            this.buttonNewInputForm.Text = "New Input form";
+            this.buttonNewInputForm.Text = "New Input Form";
             this.buttonNewInputForm.UseVisualStyleBackColor = true;
             this.buttonNewInputForm.Click += new System.EventHandler(this.button2_Click);
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(272, 78);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2);
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pictureBox1.Location = new System.Drawing.Point(280, 55);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(1024, 1024);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
             // 
             // listView1
             // 
+            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(8, 8);
-            this.listView1.Margin = new System.Windows.Forms.Padding(2);
+            this.listView1.Location = new System.Drawing.Point(12, 12);
+            this.listView1.Margin = new System.Windows.Forms.Padding(8, 8, 4, 8);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(260, 505);
+            this.listView1.Size = new System.Drawing.Size(256, 480);
             this.listView1.TabIndex = 3;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
@@ -87,9 +92,10 @@
             // 
             // linkLabel1
             // 
+            this.linkLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(1246, 20);
-            this.linkLabel1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.linkLabel1.Location = new System.Drawing.Point(1316, 20);
+            this.linkLabel1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.linkLabel1.Name = "linkLabel1";
             this.linkLabel1.Size = new System.Drawing.Size(202, 13);
             this.linkLabel1.TabIndex = 4;
@@ -99,9 +105,10 @@
             // 
             // linkLabelLoras
             // 
+            this.linkLabelLoras.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.linkLabelLoras.AutoSize = true;
-            this.linkLabelLoras.Location = new System.Drawing.Point(1338, 108);
-            this.linkLabelLoras.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.linkLabelLoras.Location = new System.Drawing.Point(1316, 100);
+            this.linkLabelLoras.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.linkLabelLoras.Name = "linkLabelLoras";
             this.linkLabelLoras.Size = new System.Drawing.Size(68, 13);
             this.linkLabelLoras.TabIndex = 5;
@@ -111,9 +118,10 @@
             // 
             // linkLabelDownloads
             // 
+            this.linkLabelDownloads.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.linkLabelDownloads.AutoSize = true;
-            this.linkLabelDownloads.Location = new System.Drawing.Point(1338, 67);
-            this.linkLabelDownloads.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.linkLabelDownloads.Location = new System.Drawing.Point(1316, 60);
+            this.linkLabelDownloads.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.linkLabelDownloads.Name = "linkLabelDownloads";
             this.linkLabelDownloads.Size = new System.Drawing.Size(95, 13);
             this.linkLabelDownloads.TabIndex = 6;
@@ -123,9 +131,10 @@
             // 
             // linkLabelModels
             // 
+            this.linkLabelModels.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.linkLabelModels.AutoSize = true;
-            this.linkLabelModels.Location = new System.Drawing.Point(1338, 89);
-            this.linkLabelModels.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.linkLabelModels.Location = new System.Drawing.Point(1316, 80);
+            this.linkLabelModels.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.linkLabelModels.Name = "linkLabelModels";
             this.linkLabelModels.Size = new System.Drawing.Size(76, 13);
             this.linkLabelModels.TabIndex = 7;
@@ -135,19 +144,21 @@
             // 
             // listboxRequests
             // 
+            this.listboxRequests.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.listboxRequests.FormattingEnabled = true;
-            this.listboxRequests.Location = new System.Drawing.Point(1326, 235);
-            this.listboxRequests.Margin = new System.Windows.Forms.Padding(2);
+            this.listboxRequests.Location = new System.Drawing.Point(1316, 240);
+            this.listboxRequests.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.listboxRequests.Name = "listboxRequests";
-            this.listboxRequests.Size = new System.Drawing.Size(165, 82);
+            this.listboxRequests.Size = new System.Drawing.Size(200, 108);
             this.listboxRequests.TabIndex = 8;
             // 
             // buttonMoveToSave
             // 
-            this.buttonMoveToSave.Location = new System.Drawing.Point(1389, 321);
-            this.buttonMoveToSave.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonMoveToSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonMoveToSave.Location = new System.Drawing.Point(1416, 360);
+            this.buttonMoveToSave.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonMoveToSave.Name = "buttonMoveToSave";
-            this.buttonMoveToSave.Size = new System.Drawing.Size(102, 45);
+            this.buttonMoveToSave.Size = new System.Drawing.Size(100, 35);
             this.buttonMoveToSave.TabIndex = 9;
             this.buttonMoveToSave.Text = "Save";
             this.buttonMoveToSave.UseVisualStyleBackColor = true;
@@ -155,28 +166,33 @@
             // 
             // buttonNewPonyInputform
             // 
-            this.buttonNewPonyInputform.Location = new System.Drawing.Point(378, 30);
-            this.buttonNewPonyInputform.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonNewPonyInputform.Location = new System.Drawing.Point(408, 12);
+            this.buttonNewPonyInputform.Margin = new System.Windows.Forms.Padding(4, 8, 4, 8);
             this.buttonNewPonyInputform.Name = "buttonNewPonyInputform";
-            this.buttonNewPonyInputform.Size = new System.Drawing.Size(102, 45);
+            this.buttonNewPonyInputform.Size = new System.Drawing.Size(120, 35);
             this.buttonNewPonyInputform.TabIndex = 10;
-            this.buttonNewPonyInputform.Text = "New Pony Input form";
+            this.buttonNewPonyInputform.Text = "New Pony Input Form";
             this.buttonNewPonyInputform.UseVisualStyleBackColor = true;
             this.buttonNewPonyInputform.Click += new System.EventHandler(this.buttonNewPonyInputform_Click);
             // 
             // textBoxCurrentRequest
             // 
-            this.textBoxCurrentRequest.Location = new System.Drawing.Point(1326, 182);
-            this.textBoxCurrentRequest.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxCurrentRequest.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxCurrentRequest.Location = new System.Drawing.Point(1316, 188);
+            this.textBoxCurrentRequest.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBoxCurrentRequest.Multiline = true;
             this.textBoxCurrentRequest.Name = "textBoxCurrentRequest";
-            this.textBoxCurrentRequest.Size = new System.Drawing.Size(165, 20);
+            this.textBoxCurrentRequest.ReadOnly = true;
+            this.textBoxCurrentRequest.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBoxCurrentRequest.Size = new System.Drawing.Size(200, 44);
             this.textBoxCurrentRequest.TabIndex = 11;
             // 
             // labelCurrentTask
             // 
+            this.labelCurrentTask.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelCurrentTask.AutoSize = true;
-            this.labelCurrentTask.Location = new System.Drawing.Point(1323, 167);
-            this.labelCurrentTask.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelCurrentTask.Location = new System.Drawing.Point(1313, 172);
+            this.labelCurrentTask.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelCurrentTask.Name = "labelCurrentTask";
             this.labelCurrentTask.Size = new System.Drawing.Size(84, 13);
             this.labelCurrentTask.TabIndex = 12;
@@ -184,9 +200,10 @@
             // 
             // labelTaskQueue
             // 
+            this.labelTaskQueue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelTaskQueue.AutoSize = true;
-            this.labelTaskQueue.Location = new System.Drawing.Point(1323, 219);
-            this.labelTaskQueue.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelTaskQueue.Location = new System.Drawing.Point(1313, 224);
+            this.labelTaskQueue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelTaskQueue.Name = "labelTaskQueue";
             this.labelTaskQueue.Size = new System.Drawing.Size(74, 13);
             this.labelTaskQueue.TabIndex = 13;
@@ -194,10 +211,11 @@
             // 
             // progressBarCurrentRequest
             // 
-            this.progressBarCurrentRequest.Location = new System.Drawing.Point(1326, 202);
-            this.progressBarCurrentRequest.Margin = new System.Windows.Forms.Padding(2);
+            this.progressBarCurrentRequest.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBarCurrentRequest.Location = new System.Drawing.Point(1316, 208);
+            this.progressBarCurrentRequest.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.progressBarCurrentRequest.Name = "progressBarCurrentRequest";
-            this.progressBarCurrentRequest.Size = new System.Drawing.Size(164, 15);
+            this.progressBarCurrentRequest.Size = new System.Drawing.Size(200, 12);
             this.progressBarCurrentRequest.TabIndex = 14;
             // 
             // checkBoxShowNewest
@@ -205,8 +223,8 @@
             this.checkBoxShowNewest.AutoSize = true;
             this.checkBoxShowNewest.Checked = true;
             this.checkBoxShowNewest.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxShowNewest.Location = new System.Drawing.Point(272, 10);
-            this.checkBoxShowNewest.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBoxShowNewest.Location = new System.Drawing.Point(280, 52);
+            this.checkBoxShowNewest.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.checkBoxShowNewest.Name = "checkBoxShowNewest";
             this.checkBoxShowNewest.Size = new System.Drawing.Size(92, 17);
             this.checkBoxShowNewest.TabIndex = 16;
@@ -215,10 +233,11 @@
             // 
             // buttonDecimateImage
             // 
-            this.buttonDecimateImage.Location = new System.Drawing.Point(9, 516);
-            this.buttonDecimateImage.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonDecimateImage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonDecimateImage.Location = new System.Drawing.Point(12, 500);
+            this.buttonDecimateImage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonDecimateImage.Name = "buttonDecimateImage";
-            this.buttonDecimateImage.Size = new System.Drawing.Size(102, 45);
+            this.buttonDecimateImage.Size = new System.Drawing.Size(120, 35);
             this.buttonDecimateImage.TabIndex = 17;
             this.buttonDecimateImage.Text = "Decimate Window";
             this.buttonDecimateImage.UseVisualStyleBackColor = true;
@@ -226,42 +245,45 @@
             // 
             // buttonLoadLastInputForm
             // 
-            this.buttonLoadLastInputForm.Location = new System.Drawing.Point(484, 29);
-            this.buttonLoadLastInputForm.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonLoadLastInputForm.Location = new System.Drawing.Point(536, 12);
+            this.buttonLoadLastInputForm.Margin = new System.Windows.Forms.Padding(4, 8, 4, 8);
             this.buttonLoadLastInputForm.Name = "buttonLoadLastInputForm";
-            this.buttonLoadLastInputForm.Size = new System.Drawing.Size(102, 45);
+            this.buttonLoadLastInputForm.Size = new System.Drawing.Size(120, 35);
             this.buttonLoadLastInputForm.TabIndex = 18;
-            this.buttonLoadLastInputForm.Text = "Load last Input form";
+            this.buttonLoadLastInputForm.Text = "Load Last Input Form";
             this.buttonLoadLastInputForm.UseVisualStyleBackColor = true;
             this.buttonLoadLastInputForm.Click += new System.EventHandler(this.buttonLoadLastInputForm_Click);
             // 
             // buttonClearQueue
             // 
-            this.buttonClearQueue.Location = new System.Drawing.Point(1326, 321);
-            this.buttonClearQueue.Margin = new System.Windows.Forms.Padding(2);
+            this.buttonClearQueue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonClearQueue.Location = new System.Drawing.Point(1316, 360);
+            this.buttonClearQueue.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonClearQueue.Name = "buttonClearQueue";
-            this.buttonClearQueue.Size = new System.Drawing.Size(58, 23);
+            this.buttonClearQueue.Size = new System.Drawing.Size(92, 35);
             this.buttonClearQueue.TabIndex = 21;
-            this.buttonClearQueue.Text = "Clear";
+            this.buttonClearQueue.Text = "Clear Queue";
             this.buttonClearQueue.UseVisualStyleBackColor = true;
             this.buttonClearQueue.Click += new System.EventHandler(this.buttonClearQueue_Click);
             // 
             // comboBoxCheckpoints
             // 
+            this.comboBoxCheckpoints.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.comboBoxCheckpoints.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxCheckpoints.FormattingEnabled = true;
-            this.comboBoxCheckpoints.Location = new System.Drawing.Point(8, 580);
-            this.comboBoxCheckpoints.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBoxCheckpoints.Location = new System.Drawing.Point(12, 560);
+            this.comboBoxCheckpoints.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.comboBoxCheckpoints.Name = "comboBoxCheckpoints";
-            this.comboBoxCheckpoints.Size = new System.Drawing.Size(260, 21);
+            this.comboBoxCheckpoints.Size = new System.Drawing.Size(256, 21);
             this.comboBoxCheckpoints.TabIndex = 20;
             this.comboBoxCheckpoints.SelectedIndexChanged += new System.EventHandler(this.comboBoxCheckpoints_SelectedIndexChanged);
             // 
             // labelCheckpoint
             // 
+            this.labelCheckpoint.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.labelCheckpoint.AutoSize = true;
-            this.labelCheckpoint.Location = new System.Drawing.Point(8, 565);
-            this.labelCheckpoint.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelCheckpoint.Location = new System.Drawing.Point(12, 544);
+            this.labelCheckpoint.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelCheckpoint.Name = "labelCheckpoint";
             this.labelCheckpoint.Size = new System.Drawing.Size(64, 13);
             this.labelCheckpoint.TabIndex = 19;
@@ -271,7 +293,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1567, 1160);
+            this.ClientSize = new System.Drawing.Size(1532, 1095);
             this.Controls.Add(this.comboBoxCheckpoints);
             this.Controls.Add(this.labelCheckpoint);
             this.Controls.Add(this.buttonLoadLastInputForm);
@@ -292,9 +314,10 @@
             this.Controls.Add(this.listView1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.buttonNewInputForm);
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.MinimumSize = new System.Drawing.Size(1548, 1134);
             this.Name = "MainForm";
-            this.Text = "Form1";
+            this.Text = "StabSharp - Stable Diffusion Interface";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

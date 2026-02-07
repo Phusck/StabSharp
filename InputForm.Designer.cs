@@ -584,7 +584,7 @@
             // trackBarSteps
             // 
             this.trackBarSteps.LargeChange = 20;
-            this.trackBarSteps.Location = new System.Drawing.Point(595, 238);
+            this.trackBarSteps.Location = new System.Drawing.Point(497, 229);
             this.trackBarSteps.Margin = new System.Windows.Forms.Padding(2);
             this.trackBarSteps.Maximum = 200;
             this.trackBarSteps.Name = "trackBarSteps";
@@ -611,10 +611,10 @@
             // 
             this.comboBoxSamplingMethod.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.comboBoxSamplingMethod.FormattingEnabled = true;
-            this.comboBoxSamplingMethod.Location = new System.Drawing.Point(594, 206);
+            this.comboBoxSamplingMethod.Location = new System.Drawing.Point(496, 197);
             this.comboBoxSamplingMethod.Margin = new System.Windows.Forms.Padding(2);
             this.comboBoxSamplingMethod.Name = "comboBoxSamplingMethod";
-            this.comboBoxSamplingMethod.Size = new System.Drawing.Size(92, 28);
+            this.comboBoxSamplingMethod.Size = new System.Drawing.Size(232, 28);
             this.comboBoxSamplingMethod.TabIndex = 25;
             // 
             // numericUpDownClipSkip
@@ -723,7 +723,7 @@
             // 
             // textBoxSteps
             // 
-            this.textBoxSteps.Location = new System.Drawing.Point(775, 245);
+            this.textBoxSteps.Location = new System.Drawing.Point(677, 236);
             this.textBoxSteps.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxSteps.Name = "textBoxSteps";
             this.textBoxSteps.ReadOnly = true;
@@ -733,7 +733,7 @@
             // 
             // textBoxCFG
             // 
-            this.textBoxCFG.Location = new System.Drawing.Point(778, 337);
+            this.textBoxCFG.Location = new System.Drawing.Point(680, 296);
             this.textBoxCFG.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxCFG.Name = "textBoxCFG";
             this.textBoxCFG.ReadOnly = true;
@@ -744,7 +744,7 @@
             // trackBarCFG
             // 
             this.trackBarCFG.LargeChange = 20;
-            this.trackBarCFG.Location = new System.Drawing.Point(598, 337);
+            this.trackBarCFG.Location = new System.Drawing.Point(500, 296);
             this.trackBarCFG.Margin = new System.Windows.Forms.Padding(2);
             this.trackBarCFG.Maximum = 20;
             this.trackBarCFG.Name = "trackBarCFG";

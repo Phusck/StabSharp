@@ -262,6 +262,30 @@ namespace StabSharp
             }
         }
 
+        /// <summary>
+        /// Ask the API server to rescan checkpoints so /sd-models is up to date.
+        /// If the server/endpoint doesn't support it, this is a no-op.
+        /// </summary>
+        public async Task RefreshCheckpointsAsync()
+        {
+            if (!IsServerRunning("127.0.0.1", 7860))
+            {
+                return;
+            }
+
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    await client.PostAsync("http://127.0.0.1:7860/sdapi/v1/refresh-checkpoints", content: null);
+                }
+                catch
+                {
+                    // Ignore refresh failures (server may not support endpoint).
+                }
+            }
+        }
+
         public async Task<bool> SetActiveCheckpointAsync(string checkpointName)
         {
             if (!IsServerRunning("127.0.0.1", 7860))

@@ -58,7 +58,6 @@
     <Compile Include="DecimateForm.Designer.cs">
       <DependentUpon>DecimateForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="InputSave.cs" />
     <Compile Include="LoraCategory.cs" />
     <Compile Include="Lora.cs" />
     <Compile Include="PromptKeywordAttribute.cs" />

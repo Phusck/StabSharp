@@ -73,11 +73,24 @@ namespace StabSharp
 
         private void UpdateRequestOverview()
         {
+            // Update the queue list box with first non-Lora prompt parts
             listboxRequests.DataSource = null;
-            listboxRequests.DataSource = promptQueue;
+            listboxRequests.Items.Clear();
+            foreach (var prompt in promptQueue)
+            {
+                string displayText = prompt.GetFirstNonLoraPromptPart();
+                if (string.IsNullOrEmpty(displayText))
+                {
+                    displayText = "(No prompt)";
+                }
+                listboxRequests.Items.Add(displayText);
+            }
+
+            // Update current request text box
             if (currentPrompt != null)
             {
-                textBoxCurrentRequest.Text = currentPrompt.ToString();
+                string displayText = currentPrompt.Value.GetFirstNonLoraPromptPart();
+                textBoxCurrentRequest.Text = string.IsNullOrEmpty(displayText) ? "(No prompt)" : displayText;
             }
             else
             {
@@ -138,14 +151,14 @@ namespace StabSharp
         }
         private void buttonLoadLastInputForm_Click(object sender, EventArgs e)
         {
-            InputSave? inputSave = SaveSystem.LoadLastPrompt();
-            if (!inputSave.HasValue)
+            Prompt? savedPrompt = SaveSystem.LoadLastPrompt();
+            if (!savedPrompt.HasValue)
             {
                 return;
             }
             InputForm inputForm = new InputForm(this);
             inputForm.Show();
-            inputForm.SetupForm(inputSave.Value.PromptParts, inputSave.Value.NegativePrompt);
+            inputForm.SetupForm(savedPrompt.Value);
         }
 
         private void buttonClearQueue_Click(object sender, EventArgs e)
@@ -313,6 +326,8 @@ namespace StabSharp
             try
             {
                 isLoadingCheckpoints = true;
+                // Ensure the server rescans the checkpoints folder so /sd-models isn't stale.
+                await sdapi.RefreshCheckpointsAsync();
                 checkpoints = await sdapi.GetCheckpointsAsync();
                 
                 if (InvokeRequired)
