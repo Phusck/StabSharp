@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,30 +9,23 @@ namespace StabSharp
 {
     internal class PromptPartCategory
     {
-        private string name;
-        private List<PromptPart> promptParts = new List<PromptPart>();
+        public string Name { get; set; } = string.Empty;
 
-        public List<PromptPart> PromptParts { get { return promptParts; } }
+        // WinForms-friendly collection for data binding
+        public BindingList<PromptPart> PromptParts { get; set; } = new BindingList<PromptPart>();
 
-        public string Name
+        public PromptPartCategory()
         {
-            get
-            { 
-                return name;
-            }
-            set
-            {
-                name = value;
-            }
+            // for JSON
         }
 
         public PromptPartCategory(string name)
         {
-            this.name = name;
+            Name = name;
         }
         public override string ToString()
         {
-            return name;
+            return Name;
         }
     }
 

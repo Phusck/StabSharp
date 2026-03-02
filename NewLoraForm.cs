@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -21,7 +20,7 @@ namespace StabSharp
         {
             Lora lora = new Lora();
             lora.LoraName = textBoxManualInput.Text;
-            lora.Parts = new List<PromptPart>();
+            lora.Parts = new BindingList<PromptPart>();
             return lora;
         }
 

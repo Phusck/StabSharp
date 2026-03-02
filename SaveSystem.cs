@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
@@ -27,17 +28,17 @@ namespace StabSharp
         }
 
 
-        public static void SaveCategoriesToJson(ObservableCollection<PromptPartCategory> categories)
+        public static void SaveCategoriesToJson(BindingList<PromptPartCategory> categories)
         {
             string json = JsonConvert.SerializeObject(categories, Formatting.Indented);
             File.WriteAllText(CATEGORIESFILE, json);
         }
-        public static void SaveLorasToJson(ObservableCollection<Lora> loras)
+        public static void SaveLorasToJson(BindingList<Lora> loras)
         {
             string json = JsonConvert.SerializeObject(loras, Formatting.Indented);
             File.WriteAllText(LORASFILE, json);
         }
-        public static void SaveLoraCategoriesToJson(ObservableCollection<LoraCategory> loraCategories)
+        public static void SaveLoraCategoriesToJson(BindingList<LoraCategory> loraCategories)
         {
             string json = JsonConvert.SerializeObject(loraCategories, Formatting.Indented);
             File.WriteAllText(LORACATEGORIESFILE, json);
@@ -56,10 +57,10 @@ namespace StabSharp
         }
 
         //A safe way of Saving, So no data is lost, can only add to the file
-        public static void SafeSaveCategoriesToJson(ObservableCollection<PromptPartCategory> categories)
+        public static void SafeSaveCategoriesToJson(BindingList<PromptPartCategory> categories)
         {
             //First we load the current data
-            ObservableCollection<PromptPartCategory> currentCategories = LoadCategoriesFromJson();
+            BindingList<PromptPartCategory> currentCategories = LoadCategoriesFromJson();
             //then we merge the new data with the old data, Comparing the names of the categories
             foreach (PromptPartCategory newCategory in categories)
             {
@@ -96,10 +97,10 @@ namespace StabSharp
             //then we save the merged data
             SaveCategoriesToJson(currentCategories);
         }
-        public static void SafeSaveLorasToJson(ObservableCollection<Lora> loras)
+        public static void SafeSaveLorasToJson(BindingList<Lora> loras)
         {
             //First we load the current data
-            ObservableCollection<Lora> currentLoras = LoadLorasFromJson();
+            BindingList<Lora> currentLoras = LoadLorasFromJson();
             //then we merge the new data with the old data, Comparing the names of the categories
             foreach (Lora newLora in loras)
             {
@@ -136,7 +137,7 @@ namespace StabSharp
             //then we save the merged data
             SaveLorasToJson(currentLoras);
         }
-        public static void SafeSaveLoraCategoriesToJson(ObservableCollection<LoraCategory> loraCategories)
+        public static void SafeSaveLoraCategoriesToJson(BindingList<LoraCategory> loraCategories)
         {
             // First load the current data
             var currentCategories = LoadLoraCategoriesFromJson();
@@ -198,7 +199,7 @@ namespace StabSharp
             SaveLoraCategoriesToJson(currentCategories);
         }
 
-        public static ObservableCollection<PromptPartCategory> LoadCategoriesFromJson()
+        public static BindingList<PromptPartCategory> LoadCategoriesFromJson()
         {
 
             if (File.Exists(CATEGORIESFILE))
@@ -210,20 +211,16 @@ namespace StabSharp
                     // If your JSON might contain additional data that's not represented in your classes, you might want to ignore those:
                     MissingMemberHandling = MissingMemberHandling.Ignore
                 };
-                var categories = JsonConvert.DeserializeObject<ObservableCollection<PromptPartCategory>>(json, settings);
-
-                if (categories == null)
-                {
-                    return new ObservableCollection<PromptPartCategory>(); // Ensure we never return null
-                }
+                var categories = JsonConvert.DeserializeObject<BindingList<PromptPartCategory>>(json, settings) ?? new BindingList<PromptPartCategory>();
+                NormalizeCategories(categories);
                 return categories;
             }
             else
             {
-                return new ObservableCollection<PromptPartCategory>();
+                return new BindingList<PromptPartCategory>();
             }
         }
-        public static ObservableCollection<Lora> LoadLorasFromJson()
+        public static BindingList<Lora> LoadLorasFromJson()
         {
             if (File.Exists(LORASFILE))
             {
@@ -234,21 +231,16 @@ namespace StabSharp
                     // If your JSON might contain additional data that's not represented in your classes, you might want to ignore those:
                     MissingMemberHandling = MissingMemberHandling.Ignore
                 };
-                var loras = JsonConvert.DeserializeObject<ObservableCollection<Lora>>(json, settings);
-
-                if (loras == null)
-                {
-                    return new ObservableCollection<Lora>();
-                }; // Ensure we never return null
-
+                var loras = JsonConvert.DeserializeObject<BindingList<Lora>>(json, settings) ?? new BindingList<Lora>();
+                NormalizeLoras(loras);
                 return loras;
             }
             else
             {
-                return new ObservableCollection<Lora>();
+                return new BindingList<Lora>();
             }
         }
-        internal static ObservableCollection<LoraCategory> LoadLoraCategoriesFromJson()
+        internal static BindingList<LoraCategory> LoadLoraCategoriesFromJson()
         {
 
             if (File.Exists(LORACATEGORIESFILE))
@@ -260,17 +252,54 @@ namespace StabSharp
                     // If your JSON might contain additional data that's not represented in your classes, you might want to ignore those:
                     MissingMemberHandling = MissingMemberHandling.Ignore
                 };
-                var loraCategories = JsonConvert.DeserializeObject<ObservableCollection<LoraCategory>>(json, settings);
-                if (loraCategories == null)
-                {
-                    return new ObservableCollection<LoraCategory>();
-                }
-                ; // Ensure we never return null
+                var loraCategories = JsonConvert.DeserializeObject<BindingList<LoraCategory>>(json, settings) ?? new BindingList<LoraCategory>();
+                NormalizeLoraCategories(loraCategories);
                 return loraCategories;
             }
             else
             {
-                return new ObservableCollection<LoraCategory>();
+                return new BindingList<LoraCategory>();
+            }
+        }
+
+        private static void NormalizeCategories(BindingList<PromptPartCategory> categories)
+        {
+            foreach (var c in categories)
+            {
+                if (c.PromptParts == null)
+                {
+                    c.PromptParts = new BindingList<PromptPart>();
+                }
+            }
+        }
+
+        private static void NormalizeLoras(BindingList<Lora> loras)
+        {
+            foreach (var l in loras)
+            {
+                if (l.Parts == null)
+                {
+                    l.Parts = new BindingList<PromptPart>();
+                }
+            }
+        }
+
+        private static void NormalizeLoraCategories(BindingList<LoraCategory> categories)
+        {
+            foreach (var c in categories)
+            {
+                if (c.Loras == null)
+                {
+                    c.Loras = new BindingList<Lora>();
+                }
+
+                foreach (var l in c.Loras)
+                {
+                    if (l.Parts == null)
+                    {
+                        l.Parts = new BindingList<PromptPart>();
+                    }
+                }
             }
         }
 

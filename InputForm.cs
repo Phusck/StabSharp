@@ -1,7 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -20,10 +19,21 @@ namespace StabSharp
 
         private MainForm mainForm;
 
-        private ObservableCollection<PromptPart> promptParts = new ObservableCollection<PromptPart>();
-        private ObservableCollection<PromptPartCategory> promptPartCategories = new ObservableCollection<PromptPartCategory>();
-        private ObservableCollection<Lora> _loras = new ObservableCollection<Lora>();
-        private ObservableCollection<LoraCategory> _loraCategories = new ObservableCollection<LoraCategory>();
+        private BindingList<PromptPart> promptParts = new BindingList<PromptPart>();
+        private BindingList<PromptPartCategory> promptPartCategories = new BindingList<PromptPartCategory>();
+        private BindingList<Lora> _loras = new BindingList<Lora>();
+        private BindingList<LoraCategory> _loraCategories = new BindingList<LoraCategory>();
+
+        // BindingSources so we never need to "rebind" (DataSource = null) to refresh.
+        private readonly BindingSource _bsPromptParts = new BindingSource();
+        private readonly BindingSource _bsPromptPartCategories = new BindingSource();
+        private readonly BindingSource _bsPromptsFromCategory = new BindingSource();
+        private readonly BindingSource _bsLoraCategories = new BindingSource();
+        private readonly BindingSource _bsLoras = new BindingSource();
+        private readonly BindingSource _bsLoraParts = new BindingSource();
+
+        // Prevent programmatic UI updates from re-triggering model updates while typing.
+        private bool _suppressSelectedPromptPartTextChanged = false;
 
         private int _lastCategoryMovedTo = -1;
 
@@ -50,7 +60,7 @@ namespace StabSharp
             "DPM++ 3M SDE Exponential"
         };
 
-        public ObservableCollection<PromptPart> PromptParts
+        public BindingList<PromptPart> PromptParts
         {
             get => promptParts;
         }
@@ -67,12 +77,11 @@ namespace StabSharp
             promptPartCategories = SaveSystem.LoadCategoriesFromJson();
             _loras = SaveSystem.LoadLorasFromJson();
             _loraCategories = SaveSystem.LoadLoraCategoriesFromJson();
-            refreshListboxCategories(false);
-            refreshListBoxLoras(false);
-            refreshListBoxLoraCategories(false);
+
+            InitializeBindings();
+
             noScrollListBoxPromptParts.MouseWheel += MouseWheelOnPromptParts;
             listBoxCategory.MouseWheel += MouseWheelOnPromptPartsCategory;
-            noScrollListBoxPromptParts.DataSource = promptParts;
             textBoxPrompt.AcceptsReturn = false;
             comboBoxSamplingMethod.DataSource = samplingMethods;
             comboBoxSamplingMethod.SelectedIndex = 0;
@@ -82,6 +91,32 @@ namespace StabSharp
             this.KeyDown += InputForm_KeyDown;
 
             UpdateSelectedPromptPartControls();
+        }
+
+        private void InitializeBindings()
+        {
+            _bsPromptParts.DataSource = promptParts;
+            noScrollListBoxPromptParts.DataSource = _bsPromptParts;
+            noScrollListBoxPromptParts.DisplayMember = nameof(PromptPart.DisplayText);
+
+            _bsPromptPartCategories.DataSource = promptPartCategories;
+            listBoxCategory.DataSource = _bsPromptPartCategories;
+            listBoxCategory.DisplayMember = nameof(PromptPartCategory.Name);
+
+            listBoxPromptsFromCatergory.DataSource = _bsPromptsFromCategory;
+            listBoxPromptsFromCatergory.DisplayMember = nameof(PromptPart.DisplayText);
+
+            _bsLoraCategories.DataSource = _loraCategories;
+            listBoxLoraCategories.DataSource = _bsLoraCategories;
+            listBoxLoraCategories.DisplayMember = nameof(LoraCategory.LoraCategoryName);
+
+            listBoxLoras.DataSource = _bsLoras;
+            listBoxLoraParts.DataSource = _bsLoraParts;
+            listBoxLoras.DisplayMember = nameof(Lora.LoraName);
+            listBoxLoraParts.DisplayMember = nameof(PromptPart.DisplayText);
+
+            RefreshCategoryDependentBindings(keepPromptIndex: false);
+            RefreshLoraDependentBindings(keepLoraIndex: false, keepPartIndex: false);
         }
 
         private void MouseWheelOnPromptPartsCategory(object sender, MouseEventArgs e)
@@ -263,7 +298,7 @@ namespace StabSharp
                 {
                     if (_loraCategories[listBoxLoraCategories.SelectedIndex].Loras == null)
                     {
-                        _loraCategories[listBoxLoraCategories.SelectedIndex].Loras = new List<Lora>();
+                        _loraCategories[listBoxLoraCategories.SelectedIndex].Loras = new BindingList<Lora>();
                     }
                     _loraCategories[listBoxLoraCategories.SelectedIndex].Loras.Add(lora);
                     refreshListBoxLoras(false);
@@ -300,7 +335,11 @@ namespace StabSharp
             promptParts.Add(new PromptPart("new Custom Prompt Part"));
             refreshListBoxPromptParts(false);
             noScrollListBoxPromptParts.SelectedIndex = noScrollListBoxPromptParts.Items.Count - 1;
-            textBoxSelectedPromptPart.Select();
+            BeginInvoke((Action)(() =>
+            {
+                textBoxSelectedPromptPart.Focus();
+                textBoxSelectedPromptPart.SelectAll();
+            }));
         }
         private void buttonDeleteCategory_Click(object sender, EventArgs e)
         {
@@ -314,12 +353,12 @@ namespace StabSharp
         }
         private void buttonDeleteLora_Click(object sender, EventArgs e)
         {
-            if (listBoxLoras.SelectedIndex == -1)
+            if (listBoxLoraCategories.SelectedIndex == -1 || listBoxLoras.SelectedIndex == -1)
             {
                 return;
             }
-            _loras.RemoveAt(listBoxLoras.SelectedIndex);
-            refreshListBoxLoras(false);
+            _loraCategories[listBoxLoraCategories.SelectedIndex].Loras.RemoveAt(listBoxLoras.SelectedIndex);
+            refreshListBoxLoras(true);
         }
         private void buttonDeleteLoraPart_Click(object sender, EventArgs e)
         {
@@ -334,7 +373,7 @@ namespace StabSharp
         {
             if (_loraCategories[comboBoxLoraCategoriestoMoveTo.SelectedIndex].Loras == null)
             {
-                _loraCategories[comboBoxLoraCategoriestoMoveTo.SelectedIndex].Loras = new List<Lora>();
+                _loraCategories[comboBoxLoraCategoriestoMoveTo.SelectedIndex].Loras = new BindingList<Lora>();
             }
             _loraCategories[comboBoxLoraCategoriestoMoveTo.SelectedIndex].Loras.Add(_loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex]);
             _loraCategories[listBoxLoraCategories.SelectedIndex].Loras.RemoveAt(listBoxLoras.SelectedIndex);
@@ -377,18 +416,20 @@ namespace StabSharp
         {
             int selectedIndex = noScrollListBoxPromptParts.SelectedIndex;
             int topIndex = noScrollListBoxPromptParts.TopIndex;
-            noScrollListBoxPromptParts.DataSource = null;
-            noScrollListBoxPromptParts.DataSource = promptParts;
+
+            _bsPromptParts.ResetBindings(false);
             if (keepSelectedIndex)
             {
-                noScrollListBoxPromptParts.SelectedIndex = selectedIndex;
-
-                // Rebinding resets scroll position; restore it so changes don't jump to top.
-                if (noScrollListBoxPromptParts.Items.Count > 0)
+                if (selectedIndex >= 0 && selectedIndex < noScrollListBoxPromptParts.Items.Count)
                 {
-                    int maxTop = Math.Max(0, noScrollListBoxPromptParts.Items.Count - 1);
-                    noScrollListBoxPromptParts.TopIndex = Math.Min(Math.Max(0, topIndex), maxTop);
+                    noScrollListBoxPromptParts.SelectedIndex = selectedIndex;
                 }
+            }
+
+            if (noScrollListBoxPromptParts.Items.Count > 0)
+            {
+                int maxTop = Math.Max(0, noScrollListBoxPromptParts.Items.Count - 1);
+                noScrollListBoxPromptParts.TopIndex = Math.Min(Math.Max(0, topIndex), maxTop);
             }
             UpdateSelectedPromptPartControls();
         }
@@ -396,29 +437,28 @@ namespace StabSharp
         {
             int selectedIndex = listBoxCategory.SelectedIndex;
             int topIndex = listBoxCategory.TopIndex;
-            listBoxCategory.DataSource = null;
-            listBoxCategory.DataSource = promptPartCategories;
+
+            _bsPromptPartCategories.ResetBindings(false);
             if (keepIndex)
             {
-                listBoxCategory.SelectedIndex = selectedIndex;
-
-                // Preserve scroll position when rebinding.
-                if (listBoxCategory.Items.Count > 0)
+                if (selectedIndex >= 0 && selectedIndex < listBoxCategory.Items.Count)
                 {
-                    int maxTop = Math.Max(0, listBoxCategory.Items.Count - 1);
-                    listBoxCategory.TopIndex = Math.Min(Math.Max(0, topIndex), maxTop);
+                    listBoxCategory.SelectedIndex = selectedIndex;
                 }
+            }
+
+            if (listBoxCategory.Items.Count > 0)
+            {
+                int maxTop = Math.Max(0, listBoxCategory.Items.Count - 1);
+                listBoxCategory.TopIndex = Math.Min(Math.Max(0, topIndex), maxTop);
             }
         }
         private void refreshListBoxPromptsFromCategory(bool keepSelectedIndex)
         {
             int selectedIndex = listBoxPromptsFromCatergory.SelectedIndex;
-            listBoxPromptsFromCatergory.DataSource = null;
-            if (listBoxCategory.SelectedIndex != -1)
-            {
-                listBoxPromptsFromCatergory.DataSource = promptPartCategories[listBoxCategory.SelectedIndex].PromptParts;
-            }
-            if (keepSelectedIndex)
+            RefreshCategoryDependentBindings(keepPromptIndex: keepSelectedIndex);
+
+            if (keepSelectedIndex && selectedIndex >= 0 && selectedIndex < listBoxPromptsFromCatergory.Items.Count)
             {
                 listBoxPromptsFromCatergory.SelectedIndex = selectedIndex;
             }
@@ -426,11 +466,13 @@ namespace StabSharp
         private void refreshListBoxLoraCategories(bool keepIndex)
         {
             int selectedIndex = listBoxLoraCategories.SelectedIndex;
-            listBoxLoraCategories.DataSource = null;
-            listBoxLoraCategories.DataSource = _loraCategories;
+            _bsLoraCategories.ResetBindings(false);
             if (keepIndex)
             {
-                listBoxLoraCategories.SelectedIndex = selectedIndex;
+                if (selectedIndex >= 0 && selectedIndex < listBoxLoraCategories.Items.Count)
+                {
+                    listBoxLoraCategories.SelectedIndex = selectedIndex;
+                }
             }
         }
         private void refreshListBoxLoras(bool keepIndex)
@@ -440,48 +482,81 @@ namespace StabSharp
                 return;
             }
             int selectedIndex = listBoxLoras.SelectedIndex;
-            listBoxLoras.DataSource = null;
-            listBoxLoras.DataSource = _loraCategories[listBoxLoraCategories.SelectedIndex].Loras;
-            if (keepIndex)
-            {
-                if (_loraCategories[listBoxLoraCategories.SelectedIndex].Loras == null)
-                {
-                    return;
-                }
+            RefreshLoraDependentBindings(keepLoraIndex: keepIndex, keepPartIndex: true);
 
-                //Make sure that tha selected index is not out of range
-                if (_loraCategories[listBoxLoraCategories.SelectedIndex].Loras.Count <= selectedIndex)
-                {
-                    listBoxLoras.SelectedIndex = selectedIndex;
-                }
+            if (keepIndex && selectedIndex >= 0 && selectedIndex < listBoxLoras.Items.Count)
+            {
+                listBoxLoras.SelectedIndex = selectedIndex;
             }
         }
         private void refreshListBoxPromptsFromLora(bool keepIndex)
         {
             //Needs to be don in this order
             int selectedIndex = listBoxLoraParts.SelectedIndex;
-            listBoxLoraParts.DataSource = null;
-            if (listBoxLoras.SelectedIndex == -1)
+            RefreshLoraDependentBindings(keepLoraIndex: true, keepPartIndex: keepIndex);
+
+            if (keepIndex && selectedIndex >= 0 && selectedIndex < listBoxLoraParts.Items.Count)
             {
-                return;
+                listBoxLoraParts.SelectedIndex = selectedIndex;
+            }
+        }
+
+        private void RefreshCategoryDependentBindings(bool keepPromptIndex)
+        {
+            int selectedPromptIndex = listBoxPromptsFromCatergory.SelectedIndex;
+
+            if (listBoxCategory.SelectedIndex != -1)
+            {
+                _bsPromptsFromCategory.DataSource = promptPartCategories[listBoxCategory.SelectedIndex].PromptParts;
+            }
+            else
+            {
+                _bsPromptsFromCategory.DataSource = null;
             }
 
+            _bsPromptsFromCategory.ResetBindings(false);
 
-            listBoxLoraParts.DataSource = _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex].Parts;
-            if (keepIndex)
+            if (keepPromptIndex && selectedPromptIndex >= 0 && selectedPromptIndex < listBoxPromptsFromCatergory.Items.Count)
             {
-                //Make sure that the list exists
-                if (_loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex].Parts == null)
-                {
-                    return;
-                }
-                //Make sure that tha selected index is not out of range
-                if (_loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex].Parts.Count <= selectedIndex)
-                {
-                    return;
-                }
+                listBoxPromptsFromCatergory.SelectedIndex = selectedPromptIndex;
+            }
+        }
 
-                listBoxLoraParts.SelectedIndex = selectedIndex;
+        private void RefreshLoraDependentBindings(bool keepLoraIndex, bool keepPartIndex)
+        {
+            int selectedLoraIndex = listBoxLoras.SelectedIndex;
+            int selectedPartIndex = listBoxLoraParts.SelectedIndex;
+
+            if (listBoxLoraCategories.SelectedIndex != -1)
+            {
+                _bsLoras.DataSource = _loraCategories[listBoxLoraCategories.SelectedIndex].Loras;
+            }
+            else
+            {
+                _bsLoras.DataSource = null;
+            }
+
+            _bsLoras.ResetBindings(false);
+
+            if (keepLoraIndex && selectedLoraIndex >= 0 && selectedLoraIndex < listBoxLoras.Items.Count)
+            {
+                listBoxLoras.SelectedIndex = selectedLoraIndex;
+            }
+
+            if (listBoxLoraCategories.SelectedIndex != -1 && listBoxLoras.SelectedIndex != -1)
+            {
+                _bsLoraParts.DataSource = _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex].Parts;
+            }
+            else
+            {
+                _bsLoraParts.DataSource = null;
+            }
+
+            _bsLoraParts.ResetBindings(false);
+
+            if (keepPartIndex && selectedPartIndex >= 0 && selectedPartIndex < listBoxLoraParts.Items.Count)
+            {
+                listBoxLoraParts.SelectedIndex = selectedPartIndex;
             }
         }
 
@@ -610,7 +685,7 @@ namespace StabSharp
                     noScrollListBoxPromptParts.SelectedIndex--;
                 }
 
-                // ObservableCollection doesn't notify WinForms binding reliably; rebind to reflect reordering.
+                // Reorder in the underlying BindingList and refresh selection/UI state.
                 refreshListBoxPromptParts(true);
             }
             else
@@ -618,15 +693,8 @@ namespace StabSharp
                 delta = Math.Min(0.05f, delta);
                 delta = Math.Max(-0.05f, delta);
 
-                // Retrieve the struct, modify it, and update it back
                 var selectedIndex = noScrollListBoxPromptParts.SelectedIndex;
-                var selectedPromptPart = promptParts[selectedIndex]; // Retrieve by value
-                selectedPromptPart.Weight += delta;                 // Modify property
-                promptParts[selectedIndex] = selectedPromptPart;    // Reassign back
-
-                // Rebind so the list display updates immediately after weight changes.
-                // refreshListBoxPromptParts preserves TopIndex so it won't jump to the top.
-                refreshListBoxPromptParts(true);
+                promptParts[selectedIndex].Weight += delta;
             }
         }
 
@@ -636,17 +704,20 @@ namespace StabSharp
         }
         private void textBoxSelectedPromptPart_TextChanged(object sender, EventArgs e)
         {
-            if (noScrollListBoxPromptParts.SelectedIndex != -1)
+            // Minimal, side-effect-free: only update the underlying model for the currently selected item.
+            // No rebinding, no selection changes, no refresh calls.
+            if (_suppressSelectedPromptPartTextChanged)
             {
-                // Get the selected PromptPart from the list
-                PromptPart selectedPromptPart = promptParts[noScrollListBoxPromptParts.SelectedIndex];
-
-                // Modify the Text property of the struct
-                selectedPromptPart.Text = textBoxSelectedPromptPart.Text;
-
-                // Update the list with the modified struct
-                promptParts[noScrollListBoxPromptParts.SelectedIndex] = selectedPromptPart;
+                return;
             }
+
+            int idx = noScrollListBoxPromptParts.SelectedIndex;
+            if (idx < 0 || idx >= promptParts.Count)
+            {
+                return;
+            }
+
+            promptParts[idx].Text = textBoxSelectedPromptPart.Text;
         }
         private void textBoxPromptPartName_TextChanged(object sender, EventArgs e)
         {
@@ -656,16 +727,8 @@ namespace StabSharp
                 return;
             }
 
-            // Retrieve the struct by value
-            var selectedCategory = promptPartCategories[listBoxCategory.SelectedIndex];
-            var selectedPromptPart = selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex];
-
-            // Modify the struct's property
-            selectedPromptPart.Text = textBoxPromptPartName.Text;
-
-            // Update the struct back into the collection
-            selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex] = selectedPromptPart;
-            promptPartCategories[listBoxCategory.SelectedIndex] = selectedCategory;
+            int idx = listBoxPromptsFromCatergory.SelectedIndex;
+            promptPartCategories[listBoxCategory.SelectedIndex].PromptParts[idx].Text = textBoxPromptPartName.Text;
 
             refreshListBoxPromptsFromCategory(true);
         }
@@ -712,12 +775,8 @@ namespace StabSharp
                 return;
             }
 
-            // Retrieve the struct, modify it, and update it back
-            PromptPart selectedPart = _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex].Parts[listBoxLoraParts.SelectedIndex];
-            selectedPart.Text = textBoxLoraPartText.Text; // Modify property
-            _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex].Parts[listBoxLoraParts.SelectedIndex] = selectedPart;
-
-            refreshListBoxPromptsFromLora(true);
+            int idx = listBoxLoraParts.SelectedIndex;
+            _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex].Parts[idx].Text = textBoxLoraPartText.Text;
         }
 
         private void listBoxPromptsFromCatergory_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -766,14 +825,8 @@ namespace StabSharp
                 return;
             }
 
-            // Retrieve the struct, modify it, and update it back
-            var selectedCategory = promptPartCategories[listBoxCategory.SelectedIndex];
-            var selectedPromptPart = selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex]; // Retrieve by value
-
-            selectedPromptPart.Weight = trackBarPromptPartWeight.Value / 100f; // Modify property
-
-            selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex] = selectedPromptPart; // Reassign back
-            promptPartCategories[listBoxCategory.SelectedIndex] = selectedCategory;
+            int idx = listBoxPromptsFromCatergory.SelectedIndex;
+            promptPartCategories[listBoxCategory.SelectedIndex].PromptParts[idx].Weight = trackBarPromptPartWeight.Value / 100f;
 
             refreshTextBoxPromptPartWeight();
             refreshListBoxPromptsFromCategory(true);
@@ -785,14 +838,8 @@ namespace StabSharp
                 return;
             }
 
-            // Retrieve the struct, modify it, and update it back
-            var selectedCategory = promptPartCategories[listBoxCategory.SelectedIndex];
-            var selectedPromptPart = selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex]; // Retrieve by value
-
-            selectedPromptPart.QuantityOfParantheses = trackBarNumberOfParantheses.Value; // Modify property
-
-            selectedCategory.PromptParts[listBoxPromptsFromCatergory.SelectedIndex] = selectedPromptPart; // Reassign back
-            promptPartCategories[listBoxCategory.SelectedIndex] = selectedCategory;
+            int idx = listBoxPromptsFromCatergory.SelectedIndex;
+            promptPartCategories[listBoxCategory.SelectedIndex].PromptParts[idx].QuantityOfParantheses = trackBarNumberOfParantheses.Value;
 
             refreshListBoxPromptsFromCategory(true);
         }
@@ -806,14 +853,8 @@ namespace StabSharp
                 return;
             }
 
-            // Retrieve the struct, modify it, and update it back
-            var selectedLora = _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex];
-            var selectedPart = selectedLora.Parts[listBoxLoraParts.SelectedIndex]; // Retrieve by value
-
-            selectedPart.Weight = trackBarLoraPartWeight.Value / 100f; // Modify property
-
-            selectedLora.Parts[listBoxLoraParts.SelectedIndex] = selectedPart; // Reassign back
-            _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex] = selectedLora;
+            int idx = listBoxLoraParts.SelectedIndex;
+            _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex].Parts[idx].Weight = trackBarLoraPartWeight.Value / 100f;
 
             refreshTextBoxLoraPartWeight();
             refreshListBoxPromptsFromLora(true);
@@ -825,14 +866,8 @@ namespace StabSharp
                 return;
             }
 
-            // Retrieve the struct, modify it, and update it back
-            var selectedLora = _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex];
-            var selectedPart = selectedLora.Parts[listBoxLoraParts.SelectedIndex]; // Retrieve by value
-
-            selectedPart.QuantityOfParantheses = trackBarNumberOfParantheses.Value; // Modify property
-
-            selectedLora.Parts[listBoxLoraParts.SelectedIndex] = selectedPart; // Reassign back
-            _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex] = selectedLora;
+            int idx = listBoxLoraParts.SelectedIndex;
+            _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex].Parts[idx].QuantityOfParantheses = trackBarNumberOfParantheses.Value;
         }
 
 
@@ -846,16 +881,8 @@ namespace StabSharp
                 return;
             }
 
-            // Retrieve the struct, modify it, and update it back
-            var selectedLora = _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex];
-            var selectedPart = selectedLora.Parts[listBoxLoraParts.SelectedIndex]; // Retrieve by value
-
-            // Update the IsLora property
-            selectedPart.IsLora = checkBoxIsLora.Checked; // Modify property
-
-            // Reassign the modified part back
-            selectedLora.Parts[listBoxLoraParts.SelectedIndex] = selectedPart; // Reassign updated part
-            _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex] = selectedLora; // Reassign updated Lora
+            int idx = listBoxLoraParts.SelectedIndex;
+            _loraCategories[listBoxLoraCategories.SelectedIndex].Loras[listBoxLoras.SelectedIndex].Parts[idx].IsLora = checkBoxIsLora.Checked;
 
             // Refresh the UI
             refreshListBoxPromptsFromLora(true);
@@ -864,9 +891,10 @@ namespace StabSharp
 
 
 
-        public void SetupForm(ObservableCollection<PromptPart> prompts, string negativeprompts)
+        public void SetupForm(IEnumerable<PromptPart> prompts, string negativeprompts)
         {
-            promptParts = prompts;
+            promptParts = new BindingList<PromptPart>((prompts ?? Array.Empty<PromptPart>()).ToList());
+            _bsPromptParts.DataSource = promptParts;
             refreshListBoxPromptParts(false);
             textBoxNegativePrompt.Text = negativeprompts;
         }
@@ -875,7 +903,8 @@ namespace StabSharp
         {
             // Prompt parts (parse back into structured PromptPart so sliders/IsLora can match)
             var parts = saved.PromptParts ?? Array.Empty<string>();
-            promptParts = new ObservableCollection<PromptPart>(parts.Select(PromptPart.ParseFromPromptStringOrDefault));
+            promptParts = new BindingList<PromptPart>(parts.Select(PromptPart.ParseFromPromptStringOrDefault).ToList());
+            _bsPromptParts.DataSource = promptParts;
             refreshListBoxPromptParts(false);
 
             // Negative prompt
@@ -987,7 +1016,7 @@ namespace StabSharp
 
         private void textBoxSelectedPromptPart_Leave(object sender, EventArgs e)
         {
-            refreshListBoxPromptParts(true);
+            // With BindingList + INotifyPropertyChanged, we don't need to force-refresh on leave.
         }
 
         private void InputForm_Load(object sender, EventArgs e)
@@ -1010,15 +1039,44 @@ namespace StabSharp
             int selectedIndex = noScrollListBoxPromptParts.SelectedIndex;
             bool hasSelection = selectedIndex != -1;
 
+            // Some bound-list updates can momentarily cause SelectedIndex to flicker to -1.
+            // Don't disable/clear the textbox while the user is actively typing.
+            if (!hasSelection && textBoxSelectedPromptPart.Focused)
+            {
+                return;
+            }
+
             textBoxSelectedPromptPart.Enabled = hasSelection;
 
             if (!hasSelection)
             {
-                textBoxSelectedPromptPart.Text = string.Empty;
+                _suppressSelectedPromptPartTextChanged = true;
+                try
+                {
+                    textBoxSelectedPromptPart.Text = string.Empty;
+                }
+                finally
+                {
+                    _suppressSelectedPromptPartTextChanged = false;
+                }
                 return;
             }
 
-            textBoxSelectedPromptPart.Text = promptParts[selectedIndex].Text;
+            string desired = promptParts[selectedIndex].Text ?? string.Empty;
+            if (!string.Equals(textBoxSelectedPromptPart.Text, desired, StringComparison.Ordinal))
+            {
+                _suppressSelectedPromptPartTextChanged = true;
+                try
+                {
+                    textBoxSelectedPromptPart.Text = desired;
+                    textBoxSelectedPromptPart.SelectionStart = textBoxSelectedPromptPart.TextLength;
+                    textBoxSelectedPromptPart.SelectionLength = 0;
+                }
+                finally
+                {
+                    _suppressSelectedPromptPartTextChanged = false;
+                }
+            }
         }
     }
 }

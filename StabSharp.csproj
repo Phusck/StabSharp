@@ -91,6 +91,7 @@
     <Compile Include="SaveSystem.cs" />
     <Compile Include="SDImageBase.cs" />
     <Compile Include="StableDiffusionAPI.cs" />
+    <Compile Include="BindingListExtensions.cs" />
     <EmbeddedResource Include="DecimateForm.resx">
       <DependentUpon>DecimateForm.cs</DependentUpon>
     </EmbeddedResource>

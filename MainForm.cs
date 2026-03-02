@@ -139,7 +139,7 @@ namespace StabSharp
         {
             //Create a new InputForm
             InputForm inputForm = new InputForm(this);
-            ObservableCollection<PromptPart> promptParts = new ObservableCollection<PromptPart>
+            List<PromptPart> promptParts = new List<PromptPart>
             {
                 new PromptPart("Score_9", 1f, 0, false),
                 new PromptPart("Score_8_up", 1f, 0, false),

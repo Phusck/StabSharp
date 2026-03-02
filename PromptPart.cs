@@ -1,32 +1,99 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.Text;
 
 namespace StabSharp
 {
     [Serializable]
-    public struct PromptPart : ICloneable
+    public class PromptPart : ICloneable, INotifyPropertyChanged
     {
-        public string Text;
-        public float Weight;
-        public int QuantityOfParantheses;
-        public bool IsLora;
+        private string _text = string.Empty;
+        private float _weight = 1f;
+        private int _quantityOfParantheses = 0;
+        private bool _isLora = false;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string DisplayText => ToString();
+
+        // For JSON deserialization
+        public PromptPart() { }
 
         public PromptPart(string text)
         {
-            Text = text;
-            Weight = 1f;
-            QuantityOfParantheses = 0;
-            IsLora = false;
+            _text = text;
+            _weight = 1f;
+            _quantityOfParantheses = 0;
+            _isLora = false;
         }
 
         public PromptPart(string text, float weight, int quantityOfCurlyBrackets, bool isLora)
         {
-            Text = text;
-            Weight = weight;
-            QuantityOfParantheses = quantityOfCurlyBrackets;
-            IsLora = isLora;
+            _text = text;
+            _weight = weight;
+            _quantityOfParantheses = quantityOfCurlyBrackets;
+            _isLora = isLora;
+        }
+
+        public string Text
+        {
+            get => _text;
+            set
+            {
+                if (string.Equals(_text, value, StringComparison.Ordinal))
+                {
+                    return;
+                }
+                _text = value;
+                OnPropertyChanged(nameof(Text));
+                OnPropertyChanged(nameof(DisplayText));
+            }
+        }
+
+        public float Weight
+        {
+            get => _weight;
+            set
+            {
+                if (Math.Abs(_weight - value) < 0.00001f)
+                {
+                    return;
+                }
+                _weight = value;
+                OnPropertyChanged(nameof(Weight));
+                OnPropertyChanged(nameof(DisplayText));
+            }
+        }
+
+        public int QuantityOfParantheses
+        {
+            get => _quantityOfParantheses;
+            set
+            {
+                if (_quantityOfParantheses == value)
+                {
+                    return;
+                }
+                _quantityOfParantheses = value;
+                OnPropertyChanged(nameof(QuantityOfParantheses));
+                OnPropertyChanged(nameof(DisplayText));
+            }
+        }
+
+        public bool IsLora
+        {
+            get => _isLora;
+            set
+            {
+                if (_isLora == value)
+                {
+                    return;
+                }
+                _isLora = value;
+                OnPropertyChanged(nameof(IsLora));
+                OnPropertyChanged(nameof(DisplayText));
+            }
         }
 
         public object Clone() 
@@ -69,6 +136,11 @@ namespace StabSharp
                 sb.Append(">");
             }
             return sb.ToString();
+        }
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         /// <summary>
