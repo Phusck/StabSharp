@@ -625,7 +625,7 @@
             this.numericUpDownClipSkip.Size = new System.Drawing.Size(90, 20);
             this.numericUpDownClipSkip.TabIndex = 26;
             this.numericUpDownClipSkip.Value = new decimal(new int[] {
-            1,
+            2,
             0,
             0,
             0});
